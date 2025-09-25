@@ -68,61 +68,31 @@ const phases = {
       "Feb-22",
     ],
     arrivals: [
-      // Phase 1 data (placeholder)
-      280000,
-      190000,
-      160000,
-      175000,
-      140000,
-      220000,
-      45000,
-      38000,
-      42000,
-      48000,
-      52000,
-      58000,
+      // Phase 1 data (no real data available)
+      null, null, null, null, null, null,
+      null, null, null, null, null, null,
       // Phase 2 data (real)
       ...chartData.arrivals,
-      // Phase 3 data (placeholder)
-      52000,
+      // Phase 3 data (no real data available)
+      null,
     ],
-    estimatedTests: [
-      // Phase 1 data (placeholder)
-      340000,
-      230000,
-      195000,
-      213000,
-      170000,
-      268000,
-      55000,
-      46000,
-      51000,
-      58000,
-      63000,
-      70000,
-      // Phase 2 data (real)
-      ...Object.values(chartData.estimated_number_of_tests.monthly),
-      // Phase 3 data (placeholder)
-      63000,
+    estimatedArrivals: [
+      // Phase 1 data (no real data available)
+      null, null, null, null, null, null,
+      null, null, null, null, null, null,
+      // Phase 2 data (real cumulative)
+      ...chartData.arrivals_cumulative,
+      // Phase 3 data (no real data available)
+      null,
     ],
     ulTests: [
-      // Phase 1 data (placeholder)
-      290000,
-      200000,
-      170000,
-      185000,
-      150000,
-      240000,
-      48000,
-      41000,
-      45000,
-      51000,
-      56000,
-      62000,
+      // Phase 1 data (no real data available)
+      null, null, null, null, null, null,
+      null, null, null, null, null, null,
       // Phase 2 data (real)
       ...Object.values(chartData.ul_number_of_tests.monthly),
-      // Phase 3 data (placeholder)
-      56000,
+      // Phase 3 data (no real data available)
+      null,
     ],
   },
   phase1: {
@@ -142,27 +112,27 @@ const phases = {
       "May-21",
       "Jun-21",
     ],
-    // Placeholder data - replace with actual data when available
-    arrivals: [280000, 190000, 160000, 175000, 140000, 220000, 45000, 38000, 42000, 48000, 52000, 58000],
-    estimatedTests: [340000, 230000, 195000, 213000, 170000, 268000, 55000, 46000, 51000, 58000, 63000, 70000],
-    ulTests: [290000, 200000, 170000, 185000, 150000, 240000, 48000, 41000, 45000, 51000, 56000, 62000],
+    // No real data available - using null to hide lines
+    arrivals: [null, null, null, null, null, null, null, null, null, null, null, null],
+    estimatedArrivals: [null, null, null, null, null, null, null, null, null, null, null, null],
+    ulTests: [null, null, null, null, null, null, null, null, null, null, null, null],
   },
   phase2: {
     name: "Phase 2",
     period: "01-07-2021 to 09-01-2022",
     months: chartData.months,
-    arrivals: chartData.arrivals,
-    estimatedTests: Object.values(chartData.estimated_number_of_tests.monthly),
+    arrivals: chartData.arrivals, // Real arrivals
+    estimatedArrivals: chartData.arrivals_cumulative, // Estimated arrivals (cumulative)
     ulTests: Object.values(chartData.ul_number_of_tests.monthly),
   },
   phase3: {
     name: "Phase 3",
     period: "10-01-2022 to 28-02-2022",
     months: ["Feb-22"],
-    // Placeholder data - replace with actual data when available
-    arrivals: [52000],
-    estimatedTests: [63000],
-    ulTests: [56000],
+    // No real data available - using null to hide lines
+    arrivals: [null],
+    estimatedArrivals: [null], 
+    ulTests: [null],
   },
 }
 
@@ -171,6 +141,16 @@ export default function ArrivalsChart() {
   const chartInstance = useRef<echarts.ECharts | null>(null)
   const [selectedPhase, setSelectedPhase] = useState<keyof typeof phases>("all")
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const [seriesVisibility, setSeriesVisibility] = useState({
+    manifest: true,
+    estimated: true,
+    ul: true,
+  })
+  const [phaseVisibility, setPhaseVisibility] = useState({
+    phase1: true,
+    phase2: true,
+    phase3: true,
+  })
 
   // Detect dark mode
   useEffect(() => {
@@ -184,6 +164,53 @@ export default function ArrivalsChart() {
 
     return () => observer.disconnect()
   }, [])
+
+  // Toggle functions and data filtering
+  const toggleSeries = (series: keyof typeof seriesVisibility) => {
+    setSeriesVisibility(prev => ({
+      ...prev,
+      [series]: !prev[series]
+    }))
+  }
+
+  const togglePhase = (phase: keyof typeof phaseVisibility) => {
+    setPhaseVisibility(prev => ({
+      ...prev,
+      [phase]: !prev[phase]
+    }))
+  }
+
+  // Filter current phase data based on phase visibility
+  const getFilteredPhaseData = () => {
+    if (selectedPhase !== 'all') {
+      return phases[selectedPhase]
+    }
+    
+    // For 'all' phase, filter based on phase visibility
+    const allPhase = phases.all
+    const filteredData = {
+      ...allPhase,
+      arrivals: allPhase.arrivals.map((value, index) => {
+        if (index < 12 && !phaseVisibility.phase1) return null
+        if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+        if (index >= 19 && !phaseVisibility.phase3) return null
+        return value
+      }),
+      estimatedArrivals: allPhase.estimatedArrivals.map((value, index) => {
+        if (index < 12 && !phaseVisibility.phase1) return null
+        if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+        if (index >= 19 && !phaseVisibility.phase3) return null
+        return value
+      }),
+      ulTests: allPhase.ulTests.map((value, index) => {
+        if (index < 12 && !phaseVisibility.phase1) return null
+        if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+        if (index >= 19 && !phaseVisibility.phase3) return null
+        return value
+      })
+    }
+    return filteredData
+  }
 
   useEffect(() => {
     if (!chartRef.current) return
@@ -206,7 +233,7 @@ export default function ArrivalsChart() {
   useEffect(() => {
     if (!chartInstance.current) return
 
-    const currentPhase = phases[selectedPhase]
+    const currentPhase = getFilteredPhaseData()
 
     const option: echarts.EChartsOption = {
       title: {
@@ -229,23 +256,22 @@ export default function ArrivalsChart() {
         formatter: (params: any) => {
           let result = `<strong>${params[0].axisValue}</strong><br/>`
           params.forEach((param: any) => {
-            result += `${param.marker} ${param.seriesName}: ${param.value.toLocaleString()}<br/>`
+            // Only show tooltip for non-null values
+            if (param.value !== null && param.value !== undefined) {
+              result += `${param.marker} ${param.seriesName}: ${param.value.toLocaleString()}<br/>`
+            }
           })
           return result
         },
       },
       legend: {
-        data: ["Real Arrivals", "Estimated Arrivals", "UL Number of Tests"],
-        top: 60,
-        left: "center",
-        selectedMode: true, // Enable legend click to toggle series visibility
-        selector: false,
+        show: false, // Hide default legend
       },
       grid: {
         left: "3%",
         right: "4%",
         bottom: "15%", // Increased bottom margin for data zoom
-        top: 120,
+        top: 80, // Reduced since no legend
         containLabel: true,
       },
       toolbox: {
@@ -275,10 +301,18 @@ export default function ArrivalsChart() {
       yAxis: {
         type: "value",
         min: 0,
-        max: 350000,
-        interval: 50000,
+        max: (() => {
+          if (selectedPhase === 'phase2' && currentPhase.estimatedArrivals) {
+            const nonNullValues = currentPhase.estimatedArrivals.filter((v): v is number => v !== null);
+            return nonNullValues.length > 0 ? Math.max(...(nonNullValues as number[])) * 1.1 : 1500000;
+          }
+          return 1500000;
+        })(),
         axisLabel: {
-          formatter: (value: number) => value / 1000 + "k",
+          formatter: (value: number) => {
+            if (value >= 1000000) return (value / 1000000).toFixed(1) + "M";
+            return (value / 1000).toFixed(0) + "k";
+          },
         },
         splitLine: {
           show: true,
@@ -320,16 +354,16 @@ export default function ArrivalsChart() {
       ],
       series: [
         {
-          name: "Real Arrivals",
+          name: "Manifest",
           type: "line",
-          stack: false,
-          data: currentPhase.arrivals,
+          data: seriesVisibility.manifest ? currentPhase.arrivals : [],
           smooth: true,
+          connectNulls: false, // Don't connect across null values
           lineStyle: {
             width: 3,
           },
           itemStyle: {
-            color: "#6b7280",
+            color: "#6b7280", // Grey color for Real Arrivals
           },
           areaStyle: {
             opacity: 0.1,
@@ -341,16 +375,16 @@ export default function ArrivalsChart() {
           legendHoverLink: true,
         },
         {
-          name: "Estimated Arrivals",
+          name: "Estimated",
           type: "line",
-          stack: false,
-          data: currentPhase.estimatedTests,
+          data: seriesVisibility.estimated ? currentPhase.estimatedArrivals : [],
           smooth: true,
+          connectNulls: false, // Don't connect across null values
           lineStyle: {
             width: 3,
           },
           itemStyle: {
-            color: "#000000",
+            color: "#000000", // Black color for Estimated Arrivals
           },
           areaStyle: {
             opacity: 0.1,
@@ -362,11 +396,11 @@ export default function ArrivalsChart() {
           legendHoverLink: true,
         },
         {
-          name: "UL Number of Tests",
+          name: "UL",
           type: "line",
-          stack: false,
-          data: currentPhase.ulTests,
+          data: seriesVisibility.ul ? currentPhase.ulTests : [],
           smooth: true,
+          connectNulls: false, // Don't connect across null values
           lineStyle: {
             width: 3,
           },
@@ -401,51 +435,122 @@ export default function ArrivalsChart() {
     chartInstance.current.on("datazoom", (params: any) => {
       console.log("Data zoom event:", params)
     })
-  }, [selectedPhase, isDarkMode]) // Added isDarkMode dependency for data zoom styling
+  }, [selectedPhase, isDarkMode, seriesVisibility, phaseVisibility]) // Added phaseVisibility dependency
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="text-2xl">Interactive Arrivals Chart</CardTitle>
-          <Select value={selectedPhase} onValueChange={(value) => setSelectedPhase(value as keyof typeof phases)}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select phase" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(phases).map(([key, phase]) => (
-                <SelectItem key={key} value={key}>
+        <div className="flex flex-col gap-4">
+          <CardTitle className="text-2xl text-center">Interactive Arrivals Chart</CardTitle>
+          
+          {/* Phase Toggle Buttons */}
+          <div className="flex flex-wrap justify-center gap-2">
+            <button
+              onClick={() => setSelectedPhase('all')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                selectedPhase === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              All Phases
+            </button>
+            {Object.entries(phases)
+              .filter(([key]) => key !== 'all')
+              .map(([key, phase]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedPhase(key as keyof typeof phases)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    selectedPhase === key
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
                   {phase.name}
-                </SelectItem>
+                </button>
               ))}
-            </SelectContent>
-          </Select>
+          </div>
+
+
+          <p className="text-sm text-muted-foreground text-center">
+            Click the cards below to toggle data series visibility.
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Select a phase to view the corresponding data. All phases are shown by default.
-        </p>
       </CardHeader>
       <CardContent>
         <div ref={chartRef} className="w-full h-[600px]" style={{ minHeight: "600px" }} />
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-950/20 rounded-lg">
-            <div className="text-2xl font-bold text-gray-600">
-              {phases[selectedPhase].arrivals.reduce((a, b) => a + b, 0).toLocaleString()}
+          <button
+            onClick={() => toggleSeries('manifest')}
+            className={`text-center p-4 rounded-lg transition-all duration-200 ${
+              seriesVisibility.manifest
+                ? 'bg-gray-50 dark:bg-gray-950/20 hover:bg-gray-100 dark:hover:bg-gray-950/30'
+                : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+            }`}
+          >
+            <div className={`text-2xl font-bold ${
+              seriesVisibility.manifest ? 'text-gray-600' : 'text-gray-400'
+            }`}>
+              {(() => {
+                const currentPhase = getFilteredPhaseData()
+                const validValues = currentPhase.arrivals.filter((v): v is number => v !== null);
+                let sum = 0;
+                (validValues as number[]).forEach(value => sum += value);
+                return sum.toLocaleString();
+              })()}
             </div>
-            <div className="text-sm text-muted-foreground">Total Real Arrivals</div>
-          </div>
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-950/20 rounded-lg">
-            <div className="text-2xl font-bold text-black dark:text-white">
-              {phases[selectedPhase].estimatedTests.reduce((a, b) => a + b, 0).toLocaleString()}
+            <div className="text-sm text-muted-foreground">Total Manifest</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {seriesVisibility.manifest ? 'Click to hide' : 'Click to show'}
             </div>
-            <div className="text-sm text-muted-foreground">Total Estimated Arrivals</div>
-          </div>
-          <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">
-              {phases[selectedPhase].ulTests.reduce((a, b) => a + b, 0).toLocaleString()}
+          </button>
+          <button
+            onClick={() => toggleSeries('estimated')}
+            className={`text-center p-4 rounded-lg transition-all duration-200 ${
+              seriesVisibility.estimated
+                ? 'bg-gray-50 dark:bg-gray-950/20 hover:bg-gray-100 dark:hover:bg-gray-950/30'
+                : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+            }`}
+          >
+            <div className={`text-2xl font-bold ${
+              seriesVisibility.estimated ? 'text-black dark:text-white' : 'text-gray-400'
+            }`}>
+              {(() => {
+                const currentPhase = getFilteredPhaseData()
+                const nonNullValues = currentPhase.estimatedArrivals.filter((v): v is number => v !== null);
+                return nonNullValues.length > 0 ? (nonNullValues[nonNullValues.length - 1] as number).toLocaleString() : 'No data';
+              })()}
             </div>
-            <div className="text-sm text-muted-foreground">Total UL Tests</div>
-          </div>
+            <div className="text-sm text-muted-foreground">Latest Estimated</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {seriesVisibility.estimated ? 'Click to hide' : 'Click to show'}
+            </div>
+          </button>
+          <button
+            onClick={() => toggleSeries('ul')}
+            className={`text-center p-4 rounded-lg transition-all duration-200 ${
+              seriesVisibility.ul
+                ? 'bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-950/30'
+                : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+            }`}
+          >
+            <div className={`text-2xl font-bold ${
+              seriesVisibility.ul ? 'text-blue-600' : 'text-gray-400'
+            }`}>
+              {(() => {
+                const currentPhase = getFilteredPhaseData()
+                const validValues = currentPhase.ulTests.filter((v): v is number => v !== null);
+                let sum = 0;
+                (validValues as number[]).forEach(value => sum += value);
+                return sum.toLocaleString();
+              })()}
+            </div>
+            <div className="text-sm text-muted-foreground">Total UL</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {seriesVisibility.ul ? 'Click to hide' : 'Click to show'}
+            </div>
+          </button>
         </div>
       </CardContent>
     </Card>
