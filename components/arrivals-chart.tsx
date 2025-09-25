@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // Import the JSON data
 const chartData = {
   months: ["Jul-21", "Aug-21", "Sep-21", "Oct-21", "Nov-21", "Dec-21", "Jan-22"],
-  arrivals: [355979, 208033, 183225, 192837, 156665, 242955, 51077],
-  arrivals_cumulative: [355979, 564012, 747237, 940074, 1096739, 1339694, 1390771],
+  arrivals: [355979, 208033, 183225, 192837, 156665, 242955, 51077], // Arrivals (Manifest)
+  arrivals_cumulative: [355979, 564012, 747237, 940074, 1096739, 1339694, 1390771], // Cumulative for chart continuity
+  estimated: [312622, 182695, 160909, 169350, 137584, 213364, 44856], // Estimated (monthly)
   percentage: ["26%", "15%", "13%", "14%", "11%", "17%", "4%"],
   ul_number_of_tests: {
     total: 1000000,
@@ -24,7 +25,7 @@ const chartData = {
     },
   },
   estimated_number_of_tests: {
-    total: 1221378,
+    total: 1216570, // Updated total based on new estimated data
     monthly: {
       "Jul-21": 312622,
       "Aug-21": 182695,
@@ -80,8 +81,8 @@ const phases = {
       // Phase 1 data (no real data available)
       null, null, null, null, null, null,
       null, null, null, null, null, null,
-      // Phase 2 data (real cumulative)
-      ...chartData.arrivals_cumulative,
+      // Phase 2 data (real monthly estimated)
+      ...chartData.estimated,
       // Phase 3 data (no real data available)
       null,
     ],
@@ -121,8 +122,8 @@ const phases = {
     name: "Phase 2",
     period: "01-07-2021 to 09-01-2022",
     months: chartData.months,
-    arrivals: chartData.arrivals, // Real arrivals
-    estimatedArrivals: chartData.arrivals_cumulative, // Estimated arrivals (cumulative)
+    arrivals: chartData.arrivals, // Arrivals (Manifest)
+    estimatedArrivals: chartData.estimated, // Estimated (monthly)
     ulTests: Object.values(chartData.ul_number_of_tests.monthly),
   },
   phase3: {
@@ -304,9 +305,12 @@ export default function ArrivalsChart() {
         max: (() => {
           if (selectedPhase === 'phase2' && currentPhase.estimatedArrivals) {
             const nonNullValues = currentPhase.estimatedArrivals.filter((v): v is number => v !== null);
-            return nonNullValues.length > 0 ? Math.max(...(nonNullValues as number[])) * 1.1 : 1500000;
+            const maxEstimated = nonNullValues.length > 0 ? Math.max(...(nonNullValues as number[])) : 0;
+            const maxArrivals = Math.max(...(currentPhase.arrivals.filter((v): v is number => v !== null) as number[]));
+            const maxUL = Math.max(...(currentPhase.ulTests.filter((v): v is number => v !== null) as number[]));
+            return Math.max(maxEstimated, maxArrivals, maxUL) * 1.1;
           }
-          return 1500000;
+          return 400000; // Reduced since we're not using cumulative data
         })(),
         axisLabel: {
           formatter: (value: number) => {
@@ -422,8 +426,13 @@ export default function ArrivalsChart() {
       animationEasing: "cubicOut",
     }
 
-    console.log(" Updating chart for phase:", selectedPhase)
-    console.log(" Chart instance exists:", !!chartInstance.current)
+    console.log("📊 Updating chart for phase:", selectedPhase)
+    console.log("📊 Chart instance exists:", !!chartInstance.current)
+    console.log("📊 Current phase data:", {
+      arrivals: currentPhase.arrivals?.slice(0, 3),
+      estimated: currentPhase.estimatedArrivals?.slice(0, 3), 
+      ulTests: currentPhase.ulTests?.slice(0, 3)
+    })
 
     chartInstance.current.setOption(option, true)
 
@@ -518,11 +527,13 @@ export default function ArrivalsChart() {
             }`}>
               {(() => {
                 const currentPhase = getFilteredPhaseData()
-                const nonNullValues = currentPhase.estimatedArrivals.filter((v): v is number => v !== null);
-                return nonNullValues.length > 0 ? (nonNullValues[nonNullValues.length - 1] as number).toLocaleString() : 'No data';
+                const validValues = currentPhase.estimatedArrivals.filter((v): v is number => v !== null);
+                let sum = 0;
+                (validValues as number[]).forEach(value => sum += value);
+                return sum.toLocaleString();
               })()}
             </div>
-            <div className="text-sm text-muted-foreground">Latest Estimated</div>
+            <div className="text-sm text-muted-foreground">Total Estimated</div>
             <div className="text-xs text-muted-foreground mt-1">
               {seriesVisibility.estimated ? 'Click to hide' : 'Click to show'}
             </div>
