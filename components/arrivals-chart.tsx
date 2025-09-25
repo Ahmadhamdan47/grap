@@ -388,18 +388,18 @@ export default function ArrivalsChart() {
       animationEasing: "cubicOut",
     }
 
-    console.log("[v0] Updating chart for phase:", selectedPhase)
-    console.log("[v0] Chart instance exists:", !!chartInstance.current)
+    console.log(" Updating chart for phase:", selectedPhase)
+    console.log(" Chart instance exists:", !!chartInstance.current)
 
     chartInstance.current.setOption(option, true)
 
     // Add event listeners for debugging
     chartInstance.current.on("legendselectchanged", (params: any) => {
-      console.log("[v0] Legend clicked:", params.name, "Selected:", params.selected)
+      console.log(" Legend clicked:", params.name, "Selected:", params.selected)
     })
 
     chartInstance.current.on("datazoom", (params: any) => {
-      console.log("[v0] Data zoom event:", params)
+      console.log("Data zoom event:", params)
     })
   }, [selectedPhase, isDarkMode]) // Added isDarkMode dependency for data zoom styling
 
