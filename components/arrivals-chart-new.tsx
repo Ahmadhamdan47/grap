@@ -38,33 +38,6 @@ const chartData = {
   },
 }
 
-// Function to process Sayrafa CSV data
-const processSayrafaData = () => {
-  // Sayrafa monthly averages for our chart timeframe (Jul 2021 - Feb 2022)
-  // Calculated from the CSV data by extracting daily rates and computing monthly averages
-  return {
-    all: [
-      // Phase 1 (no Sayrafa data available)
-      null, null, null, null, null, null, null, null, null, null, null, null,
-      // Phase 2 (Jul 2021 - Jan 2022) - Sayrafa monthly averages
-      15500,  // Jul-21 avg
-      16800,  // Aug-21 avg
-      14200,  // Sep-21 avg
-      17200,  // Oct-21 avg
-      19400,  // Nov-21 avg
-      22800,  // Dec-21 avg
-      23100,  // Jan-22 avg
-      // Phase 3 (Feb 2022)
-      20300,  // Feb-22 avg
-    ],
-    phase1: [null, null, null, null, null, null, null, null, null, null, null, null],
-    phase2: [15500, 16800, 14200, 17200, 19400, 22800, 23100],
-    phase3: [20300],  // Feb-22 Sayrafa rate
-  }
-}
-
-const sayrafaRateData = processSayrafaData()
-
 // USD to LBP exchange rate data (monthly averages from CSV)
 const exchangeRateData = {
   all: [
@@ -123,7 +96,6 @@ const phases = {
       null,
     ],
     exchangeRates: exchangeRateData.all,
-    sayrafaRates: sayrafaRateData.all,
   },
   phase1: {
     name: "Phase 1",
@@ -137,7 +109,6 @@ const phases = {
     estimatedArrivals: [null, null, null, null, null, null, null, null, null, null, null, null],
     ulTests: [null, null, null, null, null, null, null, null, null, null, null, null],
     exchangeRates: exchangeRateData.phase1,
-    sayrafaRates: sayrafaRateData.phase1,
   },
   phase2: {
     name: "Phase 2",
@@ -147,7 +118,6 @@ const phases = {
     estimatedArrivals: chartData.estimated, // Estimated (monthly)
     ulTests: Object.values(chartData.ul_number_of_tests.monthly),
     exchangeRates: exchangeRateData.phase2,
-    sayrafaRates: sayrafaRateData.phase2,
   },
   phase3: {
     name: "Phase 3",
@@ -158,7 +128,6 @@ const phases = {
     estimatedArrivals: [null], 
     ulTests: [null],
     exchangeRates: exchangeRateData.phase3,
-    sayrafaRates: sayrafaRateData.phase3,
   },
 }
 
@@ -167,14 +136,11 @@ export default function ArrivalsChart() {
   const chartInstance = useRef<echarts.ECharts | null>(null)
   const [selectedPhase, setSelectedPhase] = useState<keyof typeof phases>("all")
   const [isDarkMode, setIsDarkMode] = useState(false)
-  // Selected data index (month) for showing detailed values
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [seriesVisibility, setSeriesVisibility] = useState({
     manifest: true,
     estimated: true,
     ul: true,
     exchangeRate: true,
-    sayrafaRate: true,
   })
   const [phaseVisibility, setPhaseVisibility] = useState({
     phase1: true,
@@ -185,7 +151,6 @@ export default function ArrivalsChart() {
     betweenManifestEstimated: false,
     betweenEstimatedUL: false,
     betweenULAxis: false,
-    betweenExchangeSayrafa: false,
   })
 
   // Detect dark mode
@@ -257,12 +222,6 @@ export default function ArrivalsChart() {
         if (index >= 19 && !phaseVisibility.phase3) return null
         return value
       }),
-      sayrafaRates: allPhase.sayrafaRates.map((value, index) => {
-        if (index < 12 && !phaseVisibility.phase1) return null
-        if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-        if (index >= 19 && !phaseVisibility.phase3) return null
-        return value
-      }),
     }
     return filteredData
   }
@@ -315,8 +274,6 @@ export default function ArrivalsChart() {
               if (param.seriesName === 'USD to LBP Rate') {
                 const actualLBPRate = Math.abs(param.value);
                 result += `${param.marker} ${param.seriesName}: ${actualLBPRate.toLocaleString()} LBP<br/>`
-              } else if (param.seriesName === 'Sayrafa Rate') {
-                result += `${param.marker} ${param.seriesName}: ${param.value.toLocaleString()} LBP<br/>`
               } else {
                 result += `${param.marker} ${param.seriesName}: ${param.value.toLocaleString()}<br/>`
               }
@@ -333,8 +290,7 @@ export default function ArrivalsChart() {
           id: 'arrivals',
           left: "3%",
           right: "4%", 
-          // Give a bit more room below arrivals chart so its (hidden) x-axis isn't flush with the exchange chart
-          bottom: "60%",
+          bottom: "45%",
           top: 80,
           containLabel: true,
         },
@@ -343,24 +299,10 @@ export default function ArrivalsChart() {
           left: "3%",
           right: "4%",
           bottom: "15%",
-          // Add some vertical separation space above the exchange rate grid
           top: "60%",
           containLabel: true,
         }
       ],
-      // Global axisPointer so a vertical dotted guide spans both grids (linked on x)
-      axisPointer: {
-        link: [
-          { xAxisIndex: [0, 1] }
-        ],
-        show: true,
-        triggerOn: 'mousemove|click',
-        lineStyle: {
-          type: 'dotted',
-          width: 1.5,
-          color: isDarkMode ? '#888' : '#555'
-        }
-      },
       toolbox: {
         feature: {
           saveAsImage: {
@@ -400,13 +342,8 @@ export default function ArrivalsChart() {
           type: "category",
           boundaryGap: false,
           data: currentPhase.months,
-          offset: 10,
           axisLabel: {
             rotate: 45,
-            margin: 12,
-          },
-          axisTick: {
-            length: 6,
           },
         }
       ],
@@ -441,10 +378,9 @@ export default function ArrivalsChart() {
           type: "value",
           name: "USD to LBP Rate",
           position: "left",
-          boundaryGap: [1.20, 1.20],
           min: 1515,
-          max: 30000,
-          interval: 3500,
+          max: 27000,
+          interval: 2000,
           axisLabel: {
             formatter: (value: number) => {
               if (value >= 1000) {
@@ -519,7 +455,7 @@ export default function ArrivalsChart() {
           silent: true,
           connectNulls: false,
         }, {
-          name: "Difference 1",
+          name: "Pattern Fill 1",
           type: "line" as const,
           xAxisIndex: 0,
           yAxisIndex: 0,
@@ -569,7 +505,7 @@ export default function ArrivalsChart() {
           silent: true,
           connectNulls: false,
         }, {
-          name: "Difference 2",
+          name: "Pattern Fill 2",
           type: "line" as const,
           xAxisIndex: 0,
           yAxisIndex: 0,
@@ -606,59 +542,6 @@ export default function ArrivalsChart() {
             color: {
               type: 'pattern' as const,
               image: createDecalPattern('waves', isDarkMode),
-              repeat: 'repeat' as const
-            } as any
-          },
-          lineStyle: { opacity: 0 },
-          itemStyle: { opacity: 0 },
-          showSymbol: false,
-          silent: true,
-          connectNulls: false,
-        }] : []),
-        ...(decalPatterns.betweenExchangeSayrafa && seriesVisibility.exchangeRate && seriesVisibility.sayrafaRate ? [{
-          name: "Exchange-Sayrafa Base",
-          type: "line" as const,
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          data: currentPhase.exchangeRates.map((exchange, index) => {
-            const sayrafa = currentPhase.sayrafaRates[index]
-            if (exchange !== null && sayrafa !== null) {
-              return Math.min(Math.abs(exchange), sayrafa)
-            }
-            return null
-          }),
-          stack: 'exchange-decal',
-          areaStyle: {
-            opacity: 0.15,
-            color: {
-              type: 'pattern' as const,
-              image: createDecalPattern('diagonal', isDarkMode),
-              repeat: 'repeat' as const
-            } as any
-          },
-          lineStyle: { opacity: 0 },
-          itemStyle: { opacity: 0 },
-          showSymbol: false,
-          silent: true,
-          connectNulls: false,
-        }, {
-          name: "Exchange Difference",
-          type: "line" as const,
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          data: currentPhase.exchangeRates.map((exchange, index) => {
-            const sayrafa = currentPhase.sayrafaRates[index]
-            if (exchange !== null && sayrafa !== null) {
-              return Math.abs(Math.abs(exchange) - sayrafa)
-            }
-            return null
-          }),
-          stack: 'exchange-decal',
-          areaStyle: {
-            opacity: 0.2,
-            color: {
-              type: 'pattern' as const,
-              image: createDecalPattern('dots', isDarkMode),
               repeat: 'repeat' as const
             } as any
           },
@@ -776,71 +659,6 @@ export default function ArrivalsChart() {
             }]
           },
         },
-        {
-          name: "Sayrafa Rate",
-          type: "line",
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          data: seriesVisibility.sayrafaRate ? currentPhase.sayrafaRates : [],
-          smooth: false,
-          connectNulls: false,
-          lineStyle: {
-            width: 2,
-            type: "solid",
-          },
-          itemStyle: {
-            color: "#22c55e",
-          },
-          areaStyle: {
-            opacity: 0.2,
-            color: "#22c55e",
-          },
-          emphasis: {
-            focus: "series",
-          },
-        },
-        // Selected month vertical reference lines (duplicated for both grids)
-        ...(selectedIndex !== null ? [{
-          name: 'Selected Month (Arrivals)',
-          type: 'line' as const,
-          xAxisIndex: 0,
-          yAxisIndex: 0,
-          data: [],
-          silent: true,
-          showSymbol: false,
-          lineStyle: { opacity: 0 },
-          markLine: {
-            symbol: 'none',
-            animation: false,
-            lineStyle: {
-              color: isDarkMode ? '#bbbbbb' : '#333333',
-              width: 1.5,
-              type: 'dotted' as const
-            },
-            label: { show: false },
-            data: [ { xAxis: currentPhase.months[selectedIndex] } ]
-          }
-        }, {
-          name: 'Selected Month (Exchange)',
-          type: 'line' as const,
-            xAxisIndex: 1,
-            yAxisIndex: 1,
-            data: [],
-            silent: true,
-            showSymbol: false,
-            lineStyle: { opacity: 0 },
-            markLine: {
-              symbol: 'none',
-              animation: false,
-              lineStyle: {
-                color: isDarkMode ? '#bbbbbb' : '#333333',
-                width: 1.5,
-                type: 'dotted' as const
-              },
-              label: { show: false },
-              data: [ { xAxis: currentPhase.months[selectedIndex] } ]
-            }
-        }] : []),
       ],
       animation: true,
       animationDuration: 1000,
@@ -864,34 +682,7 @@ export default function ArrivalsChart() {
     chartInstance.current.on("datazoom", (params: any) => {
       console.log("Data zoom event:", params)
     })
-
-    // Handle click selection on any visible series point (store index and keep axisPointer in place)
-    chartInstance.current.off('click')
-    chartInstance.current.on('click', (params: any) => {
-      if (typeof params.dataIndex === 'number') {
-        setSelectedIndex(params.dataIndex)
-        // Manually dispatch an updateAxisPointer so the vertical line remains
-        chartInstance.current?.dispatchAction({
-          type: 'updateAxisPointer',
-          currTrigger: 'click',
-          xAxisIndex: [0,1],
-          position: params.event?.offsetX
-        })
-      }
-    })
-
-    // If a selection already exists after re-render (e.g., toggling series), keep axis pointer there
-    if (selectedIndex !== null) {
-      chartInstance.current.dispatchAction({
-        type: 'highlight'
-      })
-      chartInstance.current.dispatchAction({
-        type: 'showTip',
-        seriesIndex: 0,
-        dataIndex: selectedIndex
-      })
-    }
-  }, [selectedPhase, isDarkMode, seriesVisibility, phaseVisibility, decalPatterns, selectedIndex])
+  }, [selectedPhase, isDarkMode, seriesVisibility, phaseVisibility, decalPatterns])
 
   return (
     <Card className="w-full">
@@ -932,64 +723,35 @@ export default function ArrivalsChart() {
           <div className="flex justify-center">
             <button
               onClick={() => {
-                const allEnabled = decalPatterns.betweenManifestEstimated && decalPatterns.betweenEstimatedUL && decalPatterns.betweenULAxis && decalPatterns.betweenExchangeSayrafa
+                const allEnabled = decalPatterns.betweenManifestEstimated && decalPatterns.betweenEstimatedUL && decalPatterns.betweenULAxis
                 setDecalPatterns({
                   betweenManifestEstimated: !allEnabled,
                   betweenEstimatedUL: !allEnabled,
                   betweenULAxis: !allEnabled,
-                  betweenExchangeSayrafa: !allEnabled,
                 })
               }}
               className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                decalPatterns.betweenManifestEstimated || decalPatterns.betweenEstimatedUL || decalPatterns.betweenULAxis || decalPatterns.betweenExchangeSayrafa
+                decalPatterns.betweenManifestEstimated || decalPatterns.betweenEstimatedUL || decalPatterns.betweenULAxis
                   ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
-              {decalPatterns.betweenManifestEstimated || decalPatterns.betweenEstimatedUL || decalPatterns.betweenULAxis || decalPatterns.betweenExchangeSayrafa
-                ? '✓ Difference Patterns' 
-                : '○ Difference Patterns'
+              {decalPatterns.betweenManifestEstimated || decalPatterns.betweenEstimatedUL || decalPatterns.betweenULAxis 
+                ? '✓ Decal Patterns' 
+                : '○ Decal Patterns'
               }
             </button>
           </div>
 
           <p className="text-sm text-muted-foreground text-center">
-            Exchange rate displayed at bottom (1515-30000 LBP), arrivals data above with separate scales. 
+            Exchange rate displayed at bottom (1515-27000 LBP), arrivals data above with separate scales. 
             Both charts are synchronized and can be zoomed independently. Click the cards below to toggle data series visibility.
           </p>
         </div>
       </CardHeader>
       <CardContent>
         <div ref={chartRef} className="w-full h-[600px]" style={{ minHeight: "600px" }} />
-        {/* Selected month details */}
-        <div className="mt-4 p-4 rounded-lg border bg-muted/30 text-sm">
-          {(() => {
-            const currentPhase = getFilteredPhaseData()
-            if (selectedIndex === null || !currentPhase.months[selectedIndex]) {
-              return <span className="text-muted-foreground">Click a point to lock the vertical line and see that month's values.</span>
-            }
-            const monthLabel = currentPhase.months[selectedIndex]
-            const manifestVal = currentPhase.arrivals[selectedIndex]
-            const estimatedVal = currentPhase.estimatedArrivals[selectedIndex]
-            const ulVal = currentPhase.ulTests[selectedIndex]
-            const exValRaw = currentPhase.exchangeRates[selectedIndex]
-            const exVal = exValRaw != null ? Math.abs(exValRaw) : null
-            const sayrafaVal = currentPhase.sayrafaRates[selectedIndex]
-            return (
-              <div className="flex flex-wrap gap-4 items-center">
-                <div className="font-medium">{monthLabel}</div>
-                <div className="flex gap-3 flex-wrap">
-                  <span className="text-gray-600 dark:text-gray-300">Manifest: {manifestVal != null ? manifestVal.toLocaleString() : '—'}</span>
-                  <span className="text-black dark:text-white">Estimated: {estimatedVal != null ? estimatedVal.toLocaleString() : '—'}</span>
-                  <span className="text-blue-600 dark:text-blue-400">UL: {ulVal != null ? ulVal.toLocaleString() : '—'}</span>
-                  <span className="text-red-600">USD/LBP: {exVal != null ? exVal.toLocaleString() + ' LBP' : '—'}</span>
-                  <span className="text-green-600 dark:text-green-400">Sayrafa: {sayrafaVal != null ? sayrafaVal.toLocaleString() + ' LBP' : '—'}</span>
-                </div>
-              </div>
-            )
-          })()}
-        </div>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button
             onClick={() => toggleSeries('manifest')}
             className={`text-center p-4 rounded-lg transition-all duration-200 ${
@@ -1084,30 +846,6 @@ export default function ArrivalsChart() {
             <div className="text-sm text-muted-foreground">Peak Exchange Rate</div>
             <div className="text-xs text-muted-foreground mt-1">
               {seriesVisibility.exchangeRate ? 'Click to hide' : 'Click to show'}
-            </div>
-          </button>
-          <button
-            onClick={() => toggleSeries('sayrafaRate')}
-            className={`text-center p-4 rounded-lg transition-all duration-200 ${
-              seriesVisibility.sayrafaRate
-                ? 'bg-green-50 dark:bg-green-950/20 hover:bg-green-100 dark:hover:bg-green-950/30'
-                : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-            }`}
-          >
-            <div className={`text-2xl font-bold ${
-              seriesVisibility.sayrafaRate ? 'text-green-600' : 'text-gray-400'
-            }`}>
-              {(() => {
-                const currentPhase = getFilteredPhaseData()
-                const validValues = currentPhase.sayrafaRates.filter((v): v is number => v !== null);
-                if (validValues.length === 0) return 'N/A'
-                const maxRate = Math.max(...(validValues as number[]))
-                return maxRate.toLocaleString() + ' LBP'
-              })()}
-            </div>
-            <div className="text-sm text-muted-foreground">Peak Sayrafa Rate</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {seriesVisibility.sayrafaRate ? 'Click to hide' : 'Click to show'}
             </div>
           </button>
         </div>
