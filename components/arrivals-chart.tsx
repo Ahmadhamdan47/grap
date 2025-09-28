@@ -195,6 +195,15 @@
       exchangeRate: true,
       sayrafaRate: true,
     })
+    // Area fill (background color under line) visibility per series
+    const [fillVisibility, setFillVisibility] = useState({
+      manifest: true,
+      estimated: true,
+      ul: true,
+      areebaOummal: true,
+      exchangeRate: true,
+      sayrafaRate: true,
+    })
     const [phaseVisibility, setPhaseVisibility] = useState({
       phase1: true,
       phase2: true,
@@ -241,6 +250,13 @@
       setDifferenceVisibility(prev => ({
         ...prev,
         [key]: !prev[key]
+      }))
+    }
+
+    const toggleFill = (series: keyof typeof fillVisibility) => {
+      setFillVisibility(prev => ({
+        ...prev,
+        [series]: !prev[series]
       }))
     }
 
@@ -804,10 +820,10 @@
             itemStyle: {
               color: "#6b7280",
             },
-            areaStyle: {
+            areaStyle: fillVisibility.manifest ? {
               opacity: 0.1,
               color: "#6b7280",
-            },
+            } : undefined,
             emphasis: {
               focus: "series",
             },
@@ -822,7 +838,7 @@
             connectNulls: false,
             lineStyle: { width: 2, type: 'solid' },
             itemStyle: { color: '#7c3aed' },
-            areaStyle: { opacity: 0.1, color: '#7c3aed' },
+            areaStyle: fillVisibility.areebaOummal ? { opacity: 0.1, color: '#7c3aed' } : undefined,
             emphasis: { focus: 'series' }
           },
           {
@@ -839,10 +855,10 @@
             itemStyle: {
               color: "#000000",
             },
-            areaStyle: {
+            areaStyle: fillVisibility.estimated ? {
               opacity: 0.1,
               color: "#000000",
-            },
+            } : undefined,
             emphasis: {
               focus: "series",
             },
@@ -861,10 +877,10 @@
             itemStyle: {
               color: "#3b82f6",
             },
-            areaStyle: {
+            areaStyle: fillVisibility.ul ? {
               opacity: 0.1,
               color: "#3b82f6",
-            },
+            } : undefined,
             emphasis: {
               focus: "series",
             },
@@ -884,10 +900,10 @@
             itemStyle: {
               color: "#ef4444",
             },
-            areaStyle: {
+            areaStyle: fillVisibility.exchangeRate ? {
               opacity: 0.3,
               color: "#ef4444",
-            },
+            } : undefined,
             emphasis: {
               focus: "series",
             },
@@ -926,10 +942,10 @@
             itemStyle: {
               color: "#22c55e",
             },
-            areaStyle: {
+            areaStyle: fillVisibility.sayrafaRate ? {
               opacity: 0.2,
               color: "#22c55e",
-            },
+            } : undefined,
             emphasis: {
               focus: "series",
             },
@@ -1026,7 +1042,7 @@
           dataIndex: selectedIndex
         })
       }
-  }, [selectedPhase, isDarkMode, isRTL, seriesVisibility, phaseVisibility, selectedIndex, differenceVisibility])
+  }, [selectedPhase, isDarkMode, isRTL, seriesVisibility, fillVisibility, phaseVisibility, selectedIndex, differenceVisibility])
 
     return (
       <Card className={`w-full ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -1081,6 +1097,17 @@
                 onClick={() => toggleDifference('areebaManifest')}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}
               >A+O vs M</button>
+            </div>
+
+            {/* Area Fill Toggles */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+              <span className="text-xs uppercase tracking-wide text-muted-foreground mr-2">Area Fill:</span>
+              <button onClick={() => toggleFill('manifest')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.manifest ? 'bg-gray-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>Manifest</button>
+              <button onClick={() => toggleFill('areebaOummal')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.areebaOummal ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}>A+O</button>
+              <button onClick={() => toggleFill('estimated')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.estimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>Estimated</button>
+              <button onClick={() => toggleFill('ul')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.ul ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'}`}>UL</button>
+              <button onClick={() => toggleFill('exchangeRate')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.exchangeRate ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}`}>Currency</button>
+              <button onClick={() => toggleFill('sayrafaRate')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.sayrafaRate ? 'bg-green-600 text-white' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}`}>Sayrafa</button>
             </div>
 
             {/* RTL Toggle */}
