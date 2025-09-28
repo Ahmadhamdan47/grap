@@ -46,20 +46,25 @@
       all: [
         // Phase 1 (no Sayrafa data available)
         null, null, null, null, null, null, null, null, null, null, null, null,
-        // Phase 2 (Jul 2021 - Jan 2022) - Sayrafa monthly averages
-        15500,  // Jul-21 avg
-        16800,  // Aug-21 avg
-        14200,  // Sep-21 avg
-        17200,  // Oct-21 avg
-        19400,  // Nov-21 avg
-        22800,  // Dec-21 avg
-        23100,  // Jan-22 avg
-        // Phase 3 (Feb 2022)
-        20300,  // Feb-22 avg
+        // Phase 2 (Jul 2021 - Jan 2022) - Sayrafa monthly averages (recomputed rounded)
+        15250,  // Jul-21 avg
+        16628,  // Aug-21 avg
+        14740,  // Sep-21 avg
+        16479,  // Oct-21 avg
+        18705,  // Nov-21 avg
+        21495,  // Dec-21 avg
+        23381,  // Jan-22 avg
+        // Phase 3 (Feb 2022 - Jul 2022)
+        20539,  // Feb-22 avg
+        21041,  // Mar-22 avg
+        22429,  // Apr-22 avg
+        23453,  // May-22 avg
+        24781,  // Jun-22 avg
+        25480,  // Jul-22 avg
       ],
       phase1: [null, null, null, null, null, null, null, null, null, null, null, null],
-      phase2: [15500, 16800, 14200, 17200, 19400, 22800, 23100],
-      phase3: [20300],  // Feb-22 Sayrafa rate
+      phase2: [15250, 16628, 14740, 16479, 18705, 21495, 23381],
+      phase3: [20539,21041,22429,23453,24781,25480],  // Feb-22 .. Jul-22
     }
   }
 
@@ -71,14 +76,19 @@
       // Phase 1 rates (Jul 2020 - Jun 2021)
       -8081, -7433, -7686, -7803, -7820, -8286,   // Jul-Dec 2020
       -8762, -9138, -11708, -12201, -12713, -15274, // Jan-Jun 2021
-      // Phase 2 rates (Jul 2021 - Jan 2022) - negative for display below X-axis
+      // Phase 2 rates (Jul 2021 - Jan 2022)
       -19408, -19587, -16479, -19691, -22900, -25911, -26493, // Jul 2021 - Jan 2022
-      // Phase 3 rates (Feb 2022)
-      -20938, // Feb 2022
+      // Phase 3 rates (Feb 2022 - Jul 2022) monthly averages (negative for below-axis plotting)
+      -20926, // Feb-22
+      -22945, // Mar-22
+      -25760, // Apr-22
+      -29595, // May-22
+      -28607, // Jun-22
+      -29546, // Jul-22
     ],
     phase1: [-8081, -7433, -7686, -7803, -7820, -8286, -8762, -9138, -11708, -12201, -12713, -15274],
     phase2: [-19408, -19587, -16479, -19691, -22900, -25911, -26493],
-    phase3: [-20938],
+    phase3: [-20926,-22945,-25760,-29595,-28607,-29546],
   }
 
   // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Jul-22) with a leading Jul-20 null for alignment
@@ -128,8 +138,8 @@
       ulTests: ulAll,
       areebaOummal: areebaOummalAll,
     // Extend exchange & sayrafa with nulls for months beyond Feb-22
-    exchangeRates: [...exchangeRateData.all, null, null, null, null, null],
-    sayrafaRates: [...sayrafaRateData.all, null, null, null, null, null],
+  exchangeRates: exchangeRateData.all,
+  sayrafaRates: sayrafaRateData.all,
     },
     phase1: {
       name: "Phase 1",
@@ -164,8 +174,8 @@
       estimatedArrivals: estimatedAll.slice(18), 
       ulTests: ulAll.slice(18),
       areebaOummal: areebaOummalAll.slice(18),
-      exchangeRates: [exchangeRateData.phase2[6], ...exchangeRateData.phase3, null, null, null, null, null],
-      sayrafaRates: [sayrafaRateData.phase2[6], ...sayrafaRateData.phase3, null, null, null, null, null],
+      exchangeRates: [exchangeRateData.phase2[6], ...exchangeRateData.phase3],
+      sayrafaRates: [sayrafaRateData.phase2[6], ...sayrafaRateData.phase3],
     },
   }
 
@@ -195,6 +205,7 @@
       manifestEstimated: false,
       estimatedUL: false,
       marketSayrafa: false,
+      areebaManifest: false,
     })
 
     // Detect dark mode
@@ -333,8 +344,8 @@
 
       const option: echarts.EChartsOption = {
         title: {
-          text: `${currentPhase.name} - Arrivals Analysis & Market Rates`,
-          subtext: `${currentPhase.period} • Market Rate at bottom, Arrivals above with separate scales`,
+          text: `${currentPhase.name} - Arrivals Analysis & Currency Rates`,
+          subtext: `${currentPhase.period} • Currency Rate at bottom, Arrivals above with separate scales`,
           left: "center",
           textStyle: {
             fontSize: 20,
@@ -366,7 +377,7 @@
             params.forEach((p: any) => {
               if (p == null) return
               if (p.value === null || p.value === undefined) return
-              if (p.seriesName === 'Market Rate') {
+              if (p.seriesName === 'Currency Rate') {
                 valueMap[p.seriesName] = Math.abs(p.value)
               } else {
                 valueMap[p.seriesName] = p.value
@@ -376,7 +387,7 @@
             const manifest = valueMap['Manifest']
             const estimated = valueMap['Estimated']
             const ul = valueMap['UL']
-            const market = valueMap['Market Rate']
+            const currency = valueMap['Currency Rate']
             const sayrafa = valueMap['Sayrafa Rate']
             const aoVal = valueMap['Areeba+Oummal']
 
@@ -386,7 +397,9 @@
             // Group 1 (Estimated/UL) Difference: UL vs Estimated
             const diffULvsEstimated = (ul != null && estimated != null) ? Math.abs(ul - estimated) : null
             // Group 2 (Rates) Difference: Market vs Sayrafa
-            const diffMarketSayrafa = (market != null && sayrafa != null) ? Math.abs(market - sayrafa) : null
+            const diffMarketSayrafa = (currency != null && sayrafa != null) ? Math.abs(currency - sayrafa) : null
+            // Areeba+Oummal vs Manifest
+            const diffAreebaManifest = (aoVal != null && manifest != null) ? Math.abs((aoVal as number) - manifest) : null
 
             const fmt = (v: number | null | undefined, unit?: string) => {
               if (v == null) return '—'
@@ -414,8 +427,9 @@
               `<div><span style="color:#2563eb">UL:</span> ${fmt(ul)}</div>` +
               `<div><span style="color:${isDarkMode ? '#6366f1' : '#4f46e5'}">Difference (UL - Estimated):</span> ${fmt(diffULvsEstimated)}</div>` +
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin:4px 0"></div>` +
-              `<div><span style=\"color:#7c3aed\">Areeba+Oummal:</span> ${fmt(aoVal)}</div>` +
-              `<div><span style=\"color:#dc2626\">Market:</span> ${fmt(market, 'LBP')}</div>` +
+              `<div><span style=\"color:#7c3aed">Areeba+Oummal:</span> ${fmt(aoVal)}</div>` +
+              `<div><span style=\"color:#7c3aed">Difference (A+O - Manifest):</span> ${fmt(diffAreebaManifest)}</div>` +
+              `<div><span style=\"color:#dc2626">Currency:</span> ${fmt(currency, 'LBP')}</div>` +
               `<div><span style="color:#16a34a">Sayrafa:</span> ${fmt(sayrafa, 'LBP')}</div>` +
               `<div><span style="color:${isDarkMode ? '#f97316' : '#ea580c'}">Difference:</span> ${fmt(diffMarketSayrafa, 'LBP')}</div>` +
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin-top:4px"></div>` +
@@ -426,24 +440,24 @@
         legend: {
           show: false,
         },
+        // Reduced lateral padding (left/right) to effectively enlarge horizontal plotting area (~15% wider)
+        // Overall container height increased below in the DOM element.
         grid: [
           {
             id: 'arrivals',
-            left: isRTL ? "4%" : "10%",
-            right: isRTL ? "10%" : "4%", 
-            // Minimize space below arrivals chart
+            left: isRTL ? "3%" : "6%",
+            right: isRTL ? "6%" : "3%", 
             bottom: "55%",
             top: 80,
-            containLabel: false,
+            containLabel: true,
           },
           {
             id: 'exchange',
-            left: isRTL ? "4%" : "10%",
-            right: isRTL ? "10%" : "4%",
+            left: isRTL ? "3%" : "6%",
+            right: isRTL ? "6%" : "3%",
             bottom: "15%",
-            // Minimize vertical separation space above the exchange rate grid
             top: "55%",
-            containLabel: false,
+            containLabel: true,
           }
         ],
         // Global axisPointer so a vertical dotted guide spans both grids (linked on x)
@@ -524,6 +538,13 @@
               // Show full values without abbreviation (no 'k')
               formatter: (value: number) => value.toLocaleString(),
             },
+            nameLocation: 'end',
+            nameGap: 10,
+            nameRotate: 0,
+            nameTextStyle: {
+              fontWeight: 600,
+              align: 'left'
+            },
             splitLine: {
               show: true,
               lineStyle: {
@@ -536,7 +557,7 @@
             id: 'exchange-y',
             gridIndex: 1, 
             type: "value",
-            name: "Market Rate",
+            name: "Currency Rate",
             position: isRTL ? "right" : "left",
             boundaryGap: [1.20, 1.20],
             min: 1515,
@@ -546,6 +567,13 @@
               margin: 8,
               // Show full values without abbreviation (no 'k')
               formatter: (value: number) => value.toLocaleString(),
+            },
+            nameLocation: 'end',
+            nameGap: 10,
+            nameRotate: 0,
+            nameTextStyle: {
+              fontWeight: 600,
+              align: 'left'
             },
             splitLine: {
               show: true,
@@ -633,6 +661,48 @@
               }) as any
             ]
           })() : []),
+          ...(differenceVisibility.areebaManifest && seriesVisibility.areebaOummal && seriesVisibility.manifest ? (() => {
+            const m = displayData.arrivals as (number|null)[]
+            const ao = displayData.areebaOummal as (number|null)[]
+            const base = m.map((v,i)=> (v!=null && ao[i]!=null) ? Math.min(v, ao[i] as number) : null)
+            const diff = m.map((v,i)=> (v!=null && ao[i]!=null) ? Math.abs((ao[i] as number) - v) : null)
+            return [
+              ({
+                name: 'Δ A+O vs Manifest (base)',
+                type: 'line',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                stack: 'AO_M_DIFF',
+                data: base,
+                showSymbol: false,
+                smooth: true,
+                silent: true,
+                clip: true,
+                lineStyle: { opacity: 0 },
+                areaStyle: { opacity: 0 },
+                emphasis: { disabled: true },
+                tooltip: { show: false },
+                z: -2
+              }) as any,
+              ({
+                name: 'Δ A+O vs Manifest',
+                type: 'line',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                stack: 'AO_M_DIFF',
+                data: diff,
+                showSymbol: false,
+                smooth: true,
+                silent: true,
+                clip: true,
+                lineStyle: { opacity: 0 },
+                areaStyle: { color: 'rgba(204,255,0,0.45)', opacity: 0.55 },
+                emphasis: { disabled: true },
+                tooltip: { show: false },
+                z: -1
+              }) as any
+            ]
+          })() : []),
           ...(differenceVisibility.estimatedUL && seriesVisibility.estimated && seriesVisibility.ul ? (() => {
             const e = displayData.estimatedArrivals as (number|null)[]
             const u = displayData.ulTests as (number|null)[]
@@ -684,7 +754,7 @@
             const diff = m.map((v,i)=> (v!=null && s[i]!=null) ? Math.abs(v - (s[i] as number)) : null)
             return [
               ({
-                name: 'Δ Market vs Sayrafa (base)',
+                name: 'Δ Currency vs Sayrafa (base)',
                 type: 'line',
                 xAxisIndex: 1,
                 yAxisIndex: 1,
@@ -701,7 +771,7 @@
                 z: -2
               }) as any,
               ({
-                name: 'Δ Market vs Sayrafa',
+                name: 'Δ Currency vs Sayrafa',
                 type: 'line',
                 xAxisIndex: 1,
                 yAxisIndex: 1,
@@ -800,7 +870,7 @@
             },
           },
           {
-            name: "Market Rate",
+            name: "Currency Rate",
             type: "line",
             xAxisIndex: 1,
             yAxisIndex: 1,
@@ -1006,7 +1076,11 @@
               <button
                 onClick={() => toggleDifference('marketSayrafa')}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.marketSayrafa ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}`}
-              >Market vs Sayrafa</button>
+              >Currency vs Sayrafa</button>
+              <button
+                onClick={() => toggleDifference('areebaManifest')}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}
+              >A+O vs M</button>
             </div>
 
             {/* RTL Toggle */}
@@ -1024,13 +1098,14 @@
             </div>
 
             <p className="text-sm text-muted-foreground text-center">
-              Market rate displayed at bottom (1515-30000 LBP), arrivals data above with separate scales. 
+              Currency rate displayed at bottom (1515-30000 LBP), arrivals data above with separate scales. 
               Both charts are synchronized and can be zoomed independently. Click the cards below to toggle data series visibility.
             </p>
           </div>
         </CardHeader>
         <CardContent>
-          <div ref={chartRef} className="w-full h-[600px]" style={{ minHeight: "600px" }} />
+          {/* Increased chart height by ~15% (600px -> 690px) for better vertical resolution of both sections */}
+          <div ref={chartRef} className="w-full h-[690px]" style={{ minHeight: "690px" }} />
           {/* Selected month details */}
           <div className="mt-4 p-4 rounded-lg border bg-muted/30 text-sm">
             {(() => {
@@ -1180,7 +1255,7 @@
                   return avgRate.toLocaleString() + ' LBP'
                 })()}
               </div>
-              <div className="text-sm text-muted-foreground">Average Exchange Rate</div>
+              <div className="text-sm text-muted-foreground">Average Currency Rate</div>
               <div className="text-xs text-muted-foreground mt-1">
                 {seriesVisibility.exchangeRate ? 'Click to hide' : 'Click to show'}
               </div>
