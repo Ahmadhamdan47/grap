@@ -41,7 +41,7 @@
   // Function to process Sayrafa CSV data
   const processSayrafaData = () => {
     // Sayrafa monthly averages for our chart timeframe (Jul 2021 - Feb 2022)
-    // Calculated from the CSV data by extracting daily rates and computing monthly averages
+    // Phase 3 now limited to Feb 28, 2022 (only Feb-22 in phase3)
     return {
       all: [
         // Phase 1 (no Sayrafa data available)
@@ -54,23 +54,18 @@
         18705,  // Nov-21 avg
         21495,  // Dec-21 avg
         23381,  // Jan-22 avg
-        // Phase 3 (Feb 2022 - Jul 2022)
+        // Phase 3 (Feb 2022 ONLY - limited to Feb 28)
         20539,  // Feb-22 avg
-        21041,  // Mar-22 avg
-        22429,  // Apr-22 avg
-        23453,  // May-22 avg
-        24781,  // Jun-22 avg
-        25480,  // Jul-22 avg
       ],
       phase1: [null, null, null, null, null, null, null, null, null, null, null, null],
       phase2: [15250, 16628, 14740, 16479, 18705, 21495, 23381],
-      phase3: [20539,21041,22429,23453,24781,25480],  // Feb-22 .. Jul-22
+      phase3: [20539],  // Feb-22 only
     }
   }
 
   const sayrafaRateData = processSayrafaData()
 
-  // USD to LBP exchange rate data (monthly averages from CSV)
+  // USD to LBP exchange rate data (monthly averages from CSV) - Phase 3 limited to Feb 2022 only
   const exchangeRateData = {
     all: [
       // Phase 1 rates (Jul 2020 - Jun 2021)
@@ -78,36 +73,29 @@
       -8762, -9138, -11708, -12201, -12713, -15274, // Jan-Jun 2021
       // Phase 2 rates (Jul 2021 - Jan 2022)
       -19408, -19587, -16479, -19691, -22900, -25911, -26493, // Jul 2021 - Jan 2022
-      // Phase 3 rates (Feb 2022 - Jul 2022) monthly averages (negative for below-axis plotting)
+      // Phase 3 rates (Feb 2022 ONLY) monthly average (negative for below-axis plotting)
       -20926, // Feb-22
-      -22945, // Mar-22
-      -25760, // Apr-22
-      -29595, // May-22
-      -28607, // Jun-22
-      -29546, // Jul-22
     ],
     phase1: [-8081, -7433, -7686, -7803, -7820, -8286, -8762, -9138, -11708, -12201, -12713, -15274],
     phase2: [-19408, -19587, -16479, -19691, -22900, -25911, -26493],
-    phase3: [-20926,-22945,-25760,-29595,-28607,-29546],
+    phase3: [-20926], // Feb-22 only
   }
 
-  // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Jul-22) with a leading Jul-20 null for alignment
+  // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Feb-22) with a leading Jul-20 null for alignment (trimmed after Feb-22)
   const fullMonths = [
     'Jul-20','Aug-20','Sep-20','Oct-20','Nov-20','Dec-20',
     'Jan-21','Feb-21','Mar-21','Apr-21','May-21','Jun-21',
-    'Jul-21','Aug-21','Sep-21','Oct-21','Nov-21','Dec-21','Jan-22','Feb-22',
-    'Mar-22','Apr-22','May-22','Jun-22','Jul-22'
+    'Jul-21','Aug-21','Sep-21','Oct-21','Nov-21','Dec-21','Jan-22','Feb-22'
   ]
   const manifestAll: (number|null)[] = [
     null,
     74366,81928,109267,99776,155020,67076,67395,101113,107240,153360,234519,
-    355979,208033,183225,192837,156665,242955,153230,159970,201536,411037,385590,340317,460018
+    355979,208033,183225,192837,156665,242955,153230,159970
   ]
   const estimatedAll: (number|null)[] = [
     null,
     69604,76772,102471,93489,145479,62851,63151,94796,100556,143858,219848,
-    333620,195051,171831,180867,146765,227978,143836,150172,
-    null,null,null,null,null
+    333620,195051,171831,180867,146765,227978,143836,150172
   ]
   const ulAll: (number|null)[] = [
     null, // Jul-20
@@ -115,7 +103,6 @@
     null,null,null,null,null,null, // Jan21-Jun21
     255958,149581,131744,138655,112646,174691,36725, // Jul21-Jan22
     null, // Feb-22
-    null,null,null,null,null // Mar22-Jul22
   ]
   const areebaOummalAll: (number|null)[] = [
     null, // Jul-20
@@ -124,22 +111,20 @@
     null,null,null,null,null,null, // Jul21-Dec21
     74605, // Jan-22
     151443, // Feb-22
-    null,null,null,null,null // Mar22-Jul22
   ]
 
   // Phase definitions (extended all-phase; other phases kept for original segmentation)
   const phases = {
     all: {
       name: "All Phases",
-      period: "01-07-2020 to 31-07-2022",
+      period: "01-07-2020 to 28-02-2022",
       months: fullMonths,
       arrivals: manifestAll,
       estimatedArrivals: estimatedAll,
       ulTests: ulAll,
       areebaOummal: areebaOummalAll,
-    // Extend exchange & sayrafa with nulls for months beyond Feb-22
-  exchangeRates: exchangeRateData.all,
-  sayrafaRates: sayrafaRateData.all,
+      exchangeRates: exchangeRateData.all,
+      sayrafaRates: sayrafaRateData.all,
     },
     phase1: {
       name: "Phase 1",
@@ -158,24 +143,24 @@
     phase2: {
       name: "Phase 2",
       period: "01-07-2021 to 09-01-2022",
-      months: fullMonths.slice(12,18), // Jul-21 .. Dec-21
+      months: fullMonths.slice(12,18), // Jul-21 .. Dec-21 (Phase 2 ends Jan 9)
       arrivals: manifestAll.slice(12,18),
       estimatedArrivals: estimatedAll.slice(12,18),
       ulTests: ulAll.slice(12,18),
       areebaOummal: areebaOummalAll.slice(12,18),
-      exchangeRates: exchangeRateData.phase2.slice(0,6),
-      sayrafaRates: sayrafaRateData.phase2.slice(0,6),
+      exchangeRates: exchangeRateData.phase2.slice(0,6), // Jul-21 .. Dec-21 only
+      sayrafaRates: sayrafaRateData.phase2.slice(0,6),    // Jul-21 .. Dec-21 only
     },
     phase3: {
       name: "Phase 3",
-      period: "10-01-2022 to 31-07-2022",
-      months: fullMonths.slice(18), // Jan-22 .. Jul-22 (Jan partial start 10 Jan)
+      period: "10-01-2022 to 28-02-2022",
+      months: fullMonths.slice(18), // Jan-22 and Feb-22 (Phase 3 starts Jan 10)
       arrivals: manifestAll.slice(18),
       estimatedArrivals: estimatedAll.slice(18), 
       ulTests: ulAll.slice(18),
       areebaOummal: areebaOummalAll.slice(18),
-      exchangeRates: [exchangeRateData.phase2[6], ...exchangeRateData.phase3],
-      sayrafaRates: [sayrafaRateData.phase2[6], ...sayrafaRateData.phase3],
+      exchangeRates: exchangeRateData.phase2.slice(6).concat(exchangeRateData.phase3), // Jan-22 and Feb-22
+      sayrafaRates: sayrafaRateData.phase2.slice(6).concat(sayrafaRateData.phase3), // Jan-22 and Feb-22
     },
   }
 
@@ -547,8 +532,9 @@
             name: "Arrivals",
             position: isRTL ? "right" : "left",
             min: 0,
-            max: 500000,
-            interval: 50000,
+            // Phase 3 has lower ceiling requirements -> 200k max with 25k ticks
+            max: selectedPhase === 'phase3' ? 200000 : 500000,
+            interval: selectedPhase === 'phase3' ? 25000 : 50000,
             axisLabel: {
               margin: 8,
               // Show full values without abbreviation (no 'k')
@@ -950,6 +936,120 @@
               focus: "series",
             },
           },
+          // Phase separator lines (only shown in "All Phases" view)
+          ...(selectedPhase === 'all' ? [
+            // Phase 1 to Phase 2 separator (after Jun-21, before Jul-21)
+            {
+              name: 'Phase 1-2 Separator (Arrivals)',
+              type: 'line' as const,
+              xAxisIndex: 0,
+              yAxisIndex: 0,
+              data: [],
+              silent: true,
+              showSymbol: false,
+              lineStyle: { opacity: 0 },
+              markLine: {
+                symbol: 'none',
+                animation: false,
+                lineStyle: {
+                  color: '#94a3b8',
+                  width: 1,
+                  type: 'dashed' as const,
+                  opacity: 0.7
+                },
+                label: {
+                  show: true,
+                  position: 'insideEndTop',
+                  formatter: 'Phase 1 → 2',
+                  color: '#64748b',
+                  fontSize: 10,
+                  fontWeight: 'normal'
+                },
+                data: [ { xAxis: 11.5 } ] // Between Jun-21 (index 11) and Jul-21 (index 12)
+              }
+            },
+            {
+              name: 'Phase 1-2 Separator (Exchange)',
+              type: 'line' as const,
+              xAxisIndex: 1,
+              yAxisIndex: 1,
+              data: [],
+              silent: true,
+              showSymbol: false,
+              lineStyle: { opacity: 0 },
+              markLine: {
+                symbol: 'none',
+                animation: false,
+                lineStyle: {
+                  color: '#94a3b8',
+                  width: 1,
+                  type: 'dashed' as const,
+                  opacity: 0.7
+                },
+                label: { show: false },
+                data: [ { xAxis: 11.5 } ]
+              }
+            },
+            // Phase 2 to Phase 3 separator (after Dec-21, before Jan-22) - SPECIAL SEPARATOR
+            {
+              name: 'Phase 2-3 Separator (Arrivals)',
+              type: 'line' as const,
+              xAxisIndex: 0,
+              yAxisIndex: 0,
+              data: [],
+              silent: true,
+              showSymbol: false,
+              lineStyle: { opacity: 0 },
+              markLine: {
+                symbol: 'none',
+                animation: false,
+                lineStyle: {
+                  color: '#7c3aed',
+                  width: 2,
+                  type: 'solid' as const,
+                  opacity: 0.8
+                },
+                label: {
+                  show: true,
+                  position: 'insideEndTop',
+                  formatter: 'UL → Areeba+Oummal',
+                  color: '#7c3aed',
+                  fontSize: 11,
+                  fontWeight: 'bold'
+                },
+                data: [ { xAxis: 17.5 } ] // Between Dec-21 (index 17) and Jan-22 (index 18)
+              }
+            },
+            {
+              name: 'Phase 2-3 Separator (Exchange)',
+              type: 'line' as const,
+              xAxisIndex: 1,
+              yAxisIndex: 1,
+              data: [],
+              silent: true,
+              showSymbol: false,
+              lineStyle: { opacity: 0 },
+              markLine: {
+                symbol: 'none',
+                animation: false,
+                lineStyle: {
+                  color: '#7c3aed',
+                  width: 2,
+                  type: 'solid' as const,
+                  opacity: 0.8
+                },
+                label: {
+                  show: true,
+                  position: 'insideEndBottom',
+                  formatter: 'Provider Transition',
+                  color: '#7c3aed',
+                  fontSize: 10,
+                  fontWeight: 'bold'
+                },
+                data: [ { xAxis: 17.5 } ]
+              }
+            }
+          ] : []),
           // Selected month vertical reference lines (duplicated for both grids)
           ...(selectedIndex !== null ? [{
             name: 'Selected Month (Arrivals)',
