@@ -91,6 +91,21 @@
     phase3: [-20926, -22945, -25760, -29595, -28607, -29546], // Feb-22 through Jul-22
   }
 
+  // Lollar rate data (3900 LBP from Jul 2020 to Jul 2021, then null)
+  const lollarRateData = {
+    all: [
+      // Phase 1 - Lollar rate 3900 LBP (Jul 2020 - Jun 2021)
+      3900, 3900, 3900, 3900, 3900, 3900,   // Jul-Dec 2020
+      3900, 3900, 3900, 3900, 3900, 1515,   // Jan-Jun 2021
+      // Phase 2 and beyond - Lollar not active
+      null, null, null, null, null, null, null, // Jul 2021 - Jan 2022
+      null, null, null, null, null, null, // Feb-Jul 2022
+    ],
+    phase1: [3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900],
+    phase2: [null, null, null, null, null, null, null],
+    phase3: [null, null, null, null, null, null], // Feb-22 through Jul-22
+  }
+
   // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Jul-22) with a leading Jul-20 null for alignment (extended to include full data)
   const fullMonths = [
     'Jul-20','Aug-20','Sep-20','Oct-20','Nov-20','Dec-20',
@@ -140,6 +155,7 @@
       areebaOummal: areebaOummalAll,
       exchangeRates: exchangeRateData.all,
       sayrafaRates: sayrafaRateData.all,
+      lollarRates: lollarRateData.all,
     },
     phase1: {
       name: "Phase 1",
@@ -154,6 +170,7 @@
     areebaOummal: areebaOummalAll.slice(0,12),
       exchangeRates: exchangeRateData.phase1,
       sayrafaRates: sayrafaRateData.phase1,
+      lollarRates: lollarRateData.phase1,
     },
     phase2: {
       name: "Phase 2",
@@ -165,6 +182,7 @@
       areebaOummal: areebaOummalAll.slice(12,19),
       exchangeRates: exchangeRateData.phase2, // Jul-21 .. Jan-22
       sayrafaRates: sayrafaRateData.phase2,    // Jul-21 .. Jan-22
+      lollarRates: lollarRateData.phase2,
     },
     phase3: {
       name: "Phase 3",
@@ -176,6 +194,7 @@
       areebaOummal: areebaOummalAll.slice(18, 20),
       exchangeRates: exchangeRateData.phase2.slice(6).concat(exchangeRateData.phase3.slice(0, 1)), // Jan-22 and Feb-22 only
       sayrafaRates: sayrafaRateData.phase2.slice(6).concat(sayrafaRateData.phase3.slice(0, 1)), // Jan-22 and Feb-22 only
+      lollarRates: lollarRateData.phase2.slice(6).concat(lollarRateData.phase3.slice(0, 1)),
     },
   }
 
@@ -193,6 +212,7 @@
       areebaOummal: true,
       exchangeRate: true,
       sayrafaRate: true,
+      lollarRate: true,
     })
     // Area fill (background color under line) visibility per series
     const [fillVisibility, setFillVisibility] = useState({
@@ -202,6 +222,7 @@
       areebaOummal: true,
       exchangeRate: true,
       sayrafaRate: true,
+      lollarRate: true,
     })
     const [phaseVisibility, setPhaseVisibility] = useState({
       phase1: true,
@@ -1065,6 +1086,29 @@
               focus: "series",
             },
           },
+          {
+            name: "Lollar Rate",
+            type: "line",
+            xAxisIndex: 1,
+            yAxisIndex: 1,
+            data: seriesVisibility.lollarRate ? displayData.lollarRates : [],
+            smooth: false,
+            connectNulls: false,
+            lineStyle: {
+              width: 2,
+              type: "solid",
+            },
+            itemStyle: {
+              color: "#f59e0b",
+            },
+            areaStyle: fillVisibility.lollarRate ? {
+              opacity: 0.2,
+              color: "#f59e0b",
+            } : undefined,
+            emphasis: {
+              focus: "series",
+            },
+          },
           // Phase separator lines (only shown in "All Phases" view)
           ...(selectedPhase === 'all' ? [
             // Phase 1 to Phase 2 separator (after Jun-21, before Jul-21)
@@ -1300,6 +1344,15 @@
       <Card className="w-full">
         <CardHeader>
           <div className="flex flex-col gap-4">
+            {/* Navigation Button */}
+            <div className="flex justify-end">
+              <a 
+                href="/in-out"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                IN-OUT
+              </a>
+            </div>
             <CardTitle className="text-2xl text-center">Interactive Arrivals Chart & USD to LBP Exchange Rates</CardTitle>
             
             {/* Phase Toggle Buttons */}
@@ -1553,6 +1606,31 @@
               <div className="text-sm text-muted-foreground">Average Sayrafa Rate</div>
               <div className="text-xs text-muted-foreground mt-1">
                 {seriesVisibility.sayrafaRate ? 'Click to hide' : 'Click to show'}
+              </div>
+            </button>
+            <button
+              onClick={() => toggleSeries('lollarRate')}
+              className={`text-center p-4 rounded-lg transition-all duration-200 ${
+                seriesVisibility.lollarRate
+                  ? 'bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/30'
+                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+              }`}
+            >
+              <div className={`text-2xl font-bold ${
+                seriesVisibility.lollarRate ? 'text-amber-600' : 'text-gray-400'
+              }`}>
+                {(() => {
+                  const currentPhase = getFilteredPhaseData()
+                  const validValues = currentPhase.lollarRates.filter((v): v is number => v !== null);
+                  if (validValues.length === 0) return 'N/A'
+                  const sum = validValues.reduce((acc, v) => acc + v, 0)
+                  const avgRate = Math.round(sum / validValues.length)
+                  return avgRate.toLocaleString() + ' LBP'
+                })()}
+              </div>
+              <div className="text-sm text-muted-foreground">Lollar Rate</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {seriesVisibility.lollarRate ? 'Click to hide' : 'Click to show'}
               </div>
             </button>
           </div>
