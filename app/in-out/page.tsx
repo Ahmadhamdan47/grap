@@ -218,7 +218,7 @@ export default function InOutPage() {
               {/* Expense Summary Table */}
               <div>
              
-                <h4 className="text-md font-medium mb-4">Expense Types (Credit)</h4>
+                <h4 className="text-md font-medium mb-4">Payments and Expense Types (Credit)</h4>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
                     <thead>
