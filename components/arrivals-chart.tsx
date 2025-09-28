@@ -5,7 +5,7 @@
   import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-  // Import the JSON data
+  // Static seed data (legacy short window kept for phase2 reference)
   const chartData = {
     months: ["Jul-21", "Aug-21", "Sep-21", "Oct-21", "Nov-21", "Dec-21", "Jan-22"],
     arrivals: [355979, 208033, 183225, 192837, 156665, 242955, 51077], // Arrivals (Manifest)
@@ -81,49 +81,55 @@
     phase3: [-20938],
   }
 
-  // Phase definitions (Phase 2 data is available, others are placeholders)
+  // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Jul-22) with a leading Jul-20 null for alignment
+  const fullMonths = [
+    'Jul-20','Aug-20','Sep-20','Oct-20','Nov-20','Dec-20',
+    'Jan-21','Feb-21','Mar-21','Apr-21','May-21','Jun-21',
+    'Jul-21','Aug-21','Sep-21','Oct-21','Nov-21','Dec-21','Jan-22','Feb-22',
+    'Mar-22','Apr-22','May-22','Jun-22','Jul-22'
+  ]
+  const manifestAll: (number|null)[] = [
+    null,
+    74366,81928,109267,99776,155020,67076,67395,101113,107240,153360,234519,
+    355979,208033,183225,192837,156665,242955,153230,159970,201536,411037,385590,340317,460018
+  ]
+  const estimatedAll: (number|null)[] = [
+    null,
+    69604,76772,102471,93489,145479,62851,63151,94796,100556,143858,219848,
+    333620,195051,171831,180867,146765,227978,143836,150172,
+    null,null,null,null,null
+  ]
+  const ulAll: (number|null)[] = [
+    null, // Jul-20
+    null,null,null,null,null, // Aug20-Dec20
+    null,null,null,null,null,null, // Jan21-Jun21
+    255958,149581,131744,138655,112646,174691,36725, // Jul21-Jan22
+    null, // Feb-22
+    null,null,null,null,null // Mar22-Jul22
+  ]
+  const areebaOummalAll: (number|null)[] = [
+    null, // Jul-20
+    null,null,null,null,null, // Aug20-Dec20
+    null,null,null,null,null,null, // Jan21-Jun21
+    null,null,null,null,null,null, // Jul21-Dec21
+    74605, // Jan-22
+    151443, // Feb-22
+    null,null,null,null,null // Mar22-Jul22
+  ]
+
+  // Phase definitions (extended all-phase; other phases kept for original segmentation)
   const phases = {
     all: {
       name: "All Phases",
-      period: "01-07-2020 to 28-02-2022",
-      months: [
-        // Phase 1 months
-        "Jul-20", "Aug-20", "Sep-20", "Oct-20", "Nov-20", "Dec-20",
-        "Jan-21", "Feb-21", "Mar-21", "Apr-21", "May-21", "Jun-21",
-        // Phase 2 months
-        "Jul-21", "Aug-21", "Sep-21", "Oct-21", "Nov-21", "Dec-21", "Jan-22",
-        // Phase 3 months
-        "Feb-22",
-      ],
-      arrivals: [
-        // Phase 1 data (no real data available)
-        null, null, null, null, null, null,
-        null, null, null, null, null, null,
-        // Phase 2 data (real)
-        ...chartData.arrivals,
-        // Phase 3 data (no real data available)
-        null,
-      ],
-      estimatedArrivals: [
-        // Phase 1 data (no real data available)
-        null, null, null, null, null, null,
-        null, null, null, null, null, null,
-        // Phase 2 data (real monthly estimated)
-        ...chartData.estimated,
-        // Phase 3 data (no real data available)
-        null,
-      ],
-      ulTests: [
-        // Phase 1 data (no real data available)
-        null, null, null, null, null, null,
-        null, null, null, null, null, null,
-        // Phase 2 data (real)
-        ...Object.values(chartData.ul_number_of_tests.monthly),
-        // Phase 3 data (no real data available)
-        null,
-      ],
-      exchangeRates: exchangeRateData.all,
-      sayrafaRates: sayrafaRateData.all,
+      period: "01-07-2020 to 31-07-2022",
+      months: fullMonths,
+      arrivals: manifestAll,
+      estimatedArrivals: estimatedAll,
+      ulTests: ulAll,
+      areebaOummal: areebaOummalAll,
+    // Extend exchange & sayrafa with nulls for months beyond Feb-22
+    exchangeRates: [...exchangeRateData.all, null, null, null, null, null],
+    sayrafaRates: [...sayrafaRateData.all, null, null, null, null, null],
     },
     phase1: {
       name: "Phase 1",
@@ -132,33 +138,34 @@
         "Jul-20", "Aug-20", "Sep-20", "Oct-20", "Nov-20", "Dec-20",
         "Jan-21", "Feb-21", "Mar-21", "Apr-21", "May-21", "Jun-21",
       ],
-      // No real data available - using null to hide lines
-      arrivals: [null, null, null, null, null, null, null, null, null, null, null, null],
-      estimatedArrivals: [null, null, null, null, null, null, null, null, null, null, null, null],
-      ulTests: [null, null, null, null, null, null, null, null, null, null, null, null],
+    arrivals: manifestAll.slice(0,12),
+    estimatedArrivals: estimatedAll.slice(0,12),
+    ulTests: ulAll.slice(0,12),
+    areebaOummal: areebaOummalAll.slice(0,12),
       exchangeRates: exchangeRateData.phase1,
       sayrafaRates: sayrafaRateData.phase1,
     },
     phase2: {
       name: "Phase 2",
       period: "01-07-2021 to 09-01-2022",
-      months: chartData.months,
-      arrivals: chartData.arrivals, // Arrivals (Manifest)
-      estimatedArrivals: chartData.estimated, // Estimated (monthly)
-      ulTests: Object.values(chartData.ul_number_of_tests.monthly),
-      exchangeRates: exchangeRateData.phase2,
-      sayrafaRates: sayrafaRateData.phase2,
+      months: fullMonths.slice(12,18), // Jul-21 .. Dec-21
+      arrivals: manifestAll.slice(12,18),
+      estimatedArrivals: estimatedAll.slice(12,18),
+      ulTests: ulAll.slice(12,18),
+      areebaOummal: areebaOummalAll.slice(12,18),
+      exchangeRates: exchangeRateData.phase2.slice(0,6),
+      sayrafaRates: sayrafaRateData.phase2.slice(0,6),
     },
     phase3: {
       name: "Phase 3",
-      period: "10-01-2022 to 28-02-2022",
-      months: ["Feb-22"],
-      // No real data available - using null to hide lines
-      arrivals: [null],
-      estimatedArrivals: [null], 
-      ulTests: [null],
-      exchangeRates: exchangeRateData.phase3,
-      sayrafaRates: sayrafaRateData.phase3,
+      period: "10-01-2022 to 31-07-2022",
+      months: fullMonths.slice(18), // Jan-22 .. Jul-22 (Jan partial start 10 Jan)
+      arrivals: manifestAll.slice(18),
+      estimatedArrivals: estimatedAll.slice(18), 
+      ulTests: ulAll.slice(18),
+      areebaOummal: areebaOummalAll.slice(18),
+      exchangeRates: [exchangeRateData.phase2[6], ...exchangeRateData.phase3, null, null, null, null, null],
+      sayrafaRates: [sayrafaRateData.phase2[6], ...sayrafaRateData.phase3, null, null, null, null, null],
     },
   }
 
@@ -174,6 +181,7 @@
       manifest: true,
       estimated: true,
       ul: true,
+      areebaOummal: true,
       exchangeRate: true,
       sayrafaRate: true,
     })
@@ -201,6 +209,7 @@
 
       return () => observer.disconnect()
     }, [])
+
 
     // Toggle functions and data filtering
     const toggleSeries = (series: keyof typeof seriesVisibility) => {
@@ -238,32 +247,38 @@
         ...allPhase,
         arrivals: allPhase.arrivals.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         estimatedArrivals: allPhase.estimatedArrivals.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         ulTests: allPhase.ulTests.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         exchangeRates: allPhase.exchangeRates.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         sayrafaRates: allPhase.sayrafaRates.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
+          return value
+        }),
+        areebaOummal: allPhase.areebaOummal.map((value, index) => {
+          if (index < 12 && !phaseVisibility.phase1) return null
+          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
       }
@@ -333,6 +348,17 @@
             label: {
               backgroundColor: "#6a7985",
             },
+            // Make the horizontal (and crosshair) line match the vertical highlight style
+            lineStyle: {
+              color: '#CCFF00',
+              width: 2,
+              type: 'solid'
+            },
+            crossStyle: {
+              color: '#CCFF00',
+              width: 2,
+              type: 'solid'
+            }
           },
           formatter: (params: any) => {
             // Collect values by series name first
@@ -352,6 +378,7 @@
             const ul = valueMap['UL']
             const market = valueMap['Market Rate']
             const sayrafa = valueMap['Sayrafa Rate']
+            const aoVal = valueMap['Areeba+Oummal']
 
             // Differences (always absolute, never show negative signs)
             // Manifest vs Estimated
@@ -387,7 +414,8 @@
               `<div><span style="color:#2563eb">UL:</span> ${fmt(ul)}</div>` +
               `<div><span style="color:${isDarkMode ? '#6366f1' : '#4f46e5'}">Difference (UL - Estimated):</span> ${fmt(diffULvsEstimated)}</div>` +
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin:4px 0"></div>` +
-              `<div><span style="color:#dc2626">Market:</span> ${fmt(market, 'LBP')}</div>` +
+              `<div><span style=\"color:#7c3aed\">Areeba+Oummal:</span> ${fmt(aoVal)}</div>` +
+              `<div><span style=\"color:#dc2626\">Market:</span> ${fmt(market, 'LBP')}</div>` +
               `<div><span style="color:#16a34a">Sayrafa:</span> ${fmt(sayrafa, 'LBP')}</div>` +
               `<div><span style="color:${isDarkMode ? '#f97316' : '#ea580c'}">Difference:</span> ${fmt(diffMarketSayrafa, 'LBP')}</div>` +
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin-top:4px"></div>` +
@@ -489,7 +517,7 @@
             name: "Arrivals",
             position: isRTL ? "right" : "left",
             min: 0,
-            max: 400000,
+            max: 500000,
             interval: 50000,
             axisLabel: {
               margin: 8,
@@ -713,6 +741,19 @@
             emphasis: {
               focus: "series",
             },
+          },
+          {
+            name: "Areeba+Oummal",
+            type: "line",
+            xAxisIndex: 0,
+            yAxisIndex: 0,
+            data: seriesVisibility.areebaOummal ? displayData.areebaOummal : [],
+            smooth: true,
+            connectNulls: false,
+            lineStyle: { width: 2, type: 'solid' },
+            itemStyle: { color: '#7c3aed' },
+            areaStyle: { opacity: 0.1, color: '#7c3aed' },
+            emphasis: { focus: 'series' }
           },
           {
             name: "Estimated",
@@ -1005,6 +1046,7 @@
               const exValRaw = displayData.exchangeRates[selectedIndex]
               const exVal = exValRaw != null ? Math.abs(exValRaw) : null
               const sayrafaVal = displayData.sayrafaRates[selectedIndex]
+              const aoVal = currentPhase.areebaOummal ? currentPhase.areebaOummal[selectedIndex] : null
               return (
                 <div className="flex flex-wrap gap-4 items-center">
                   <div className="font-medium">{monthLabel}</div>
@@ -1012,6 +1054,7 @@
                     <span className="text-gray-600 dark:text-gray-300">Manifest: {manifestVal != null ? manifestVal.toLocaleString() : '—'}</span>
                     <span className="text-black dark:text-white">Estimated: {estimatedVal != null ? estimatedVal.toLocaleString() : '—'}</span>
                     <span className="text-blue-600 dark:text-blue-400">UL: {ulVal != null ? ulVal.toLocaleString() : '—'}</span>
+                    <span className="text-purple-600 dark:text-purple-400">Areeba+Oummal: {aoVal != null ? (aoVal as number).toLocaleString() : '—'}</span>
                     <span className="text-red-600">USD/LBP: {exVal != null ? exVal.toLocaleString() + ' LBP' : '—'}</span>
                     <span className="text-green-600 dark:text-green-400">Sayrafa: {sayrafaVal != null ? sayrafaVal.toLocaleString() + ' LBP' : '—'}</span>
                   </div>
@@ -1019,7 +1062,7 @@
               )
             })()}
           </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <button
               onClick={() => toggleSeries('manifest')}
               className={`text-center p-4 rounded-lg transition-all duration-200 ${
@@ -1042,6 +1085,31 @@
               <div className="text-sm text-muted-foreground">Total Manifest</div>
               <div className="text-xs text-muted-foreground mt-1">
                 {seriesVisibility.manifest ? 'Click to hide' : 'Click to show'}
+              </div>
+            </button>
+            <button
+              onClick={() => toggleSeries('areebaOummal')}
+              className={`text-center p-4 rounded-lg transition-all duration-200 ${
+                seriesVisibility.areebaOummal
+                  ? 'bg-purple-50 dark:bg-purple-950/20 hover:bg-purple-100 dark:hover:bg-purple-950/30'
+                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+              }`}
+            >
+              <div className={`text-2xl font-bold ${
+                seriesVisibility.areebaOummal ? 'text-purple-600' : 'text-gray-400'
+              }`}>
+                {(() => {
+                  const currentPhase = getFilteredPhaseData()
+                  if (!currentPhase.areebaOummal) return '—'
+                  const validValues = currentPhase.areebaOummal.filter((v: number | null): v is number => v != null)
+                  if (!validValues.length) return '—'
+                  const sum = validValues.reduce((a:number,b:number)=>a+b,0)
+                  return sum.toLocaleString()
+                })()}
+              </div>
+              <div className="text-sm text-muted-foreground">Total Areeba+Oummal</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {seriesVisibility.areebaOummal ? 'Click to hide' : 'Click to show'}
               </div>
             </button>
             <button
