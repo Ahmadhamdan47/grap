@@ -142,18 +142,18 @@
     },
     phase2: {
       name: "Phase 2",
-      period: "01-07-2021 to 09-01-2022",
-      months: fullMonths.slice(12,18), // Jul-21 .. Dec-21 (Phase 2 ends Jan 9)
-      arrivals: manifestAll.slice(12,18),
-      estimatedArrivals: estimatedAll.slice(12,18),
-      ulTests: ulAll.slice(12,18),
-      areebaOummal: areebaOummalAll.slice(12,18),
-      exchangeRates: exchangeRateData.phase2.slice(0,6), // Jul-21 .. Dec-21 only
-      sayrafaRates: sayrafaRateData.phase2.slice(0,6),    // Jul-21 .. Dec-21 only
+      period: "01-07-2021 to 09-01-2022 (UL ends Jan 9)",
+      months: fullMonths.slice(12,19), // Jul-21 .. Jan-22 (Phase 2 ends Jan 9, includes partial Jan)
+      arrivals: manifestAll.slice(12,19),
+      estimatedArrivals: estimatedAll.slice(12,19),
+      ulTests: ulAll.slice(12,19),
+      areebaOummal: areebaOummalAll.slice(12,19),
+      exchangeRates: exchangeRateData.phase2, // Jul-21 .. Jan-22
+      sayrafaRates: sayrafaRateData.phase2,    // Jul-21 .. Jan-22
     },
     phase3: {
       name: "Phase 3",
-      period: "10-01-2022 to 28-02-2022",
+      period: "10-01-2022 to 28-02-2022 (Areeba+Oummal starts Jan 10)",
       months: fullMonths.slice(18), // Jan-22 and Feb-22 (Phase 3 starts Jan 10)
       arrivals: manifestAll.slice(18),
       estimatedArrivals: estimatedAll.slice(18), 
@@ -259,38 +259,38 @@
         ...allPhase,
         arrivals: allPhase.arrivals.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
-          if (index >= 18 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+          if (index >= 19 && !phaseVisibility.phase3) return null
           return value
         }),
         estimatedArrivals: allPhase.estimatedArrivals.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
-          if (index >= 18 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+          if (index >= 19 && !phaseVisibility.phase3) return null
           return value
         }),
         ulTests: allPhase.ulTests.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
-          if (index >= 18 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+          if (index >= 19 && !phaseVisibility.phase3) return null
           return value
         }),
         exchangeRates: allPhase.exchangeRates.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
-          if (index >= 18 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+          if (index >= 19 && !phaseVisibility.phase3) return null
           return value
         }),
         sayrafaRates: allPhase.sayrafaRates.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
-          if (index >= 18 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+          if (index >= 19 && !phaseVisibility.phase3) return null
           return value
         }),
         areebaOummal: allPhase.areebaOummal.map((value, index) => {
           if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 18 && !phaseVisibility.phase2) return null
-          if (index >= 18 && !phaseVisibility.phase3) return null
+          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
+          if (index >= 19 && !phaseVisibility.phase3) return null
           return value
         }),
       }
@@ -342,6 +342,44 @@
 
       const currentPhase = getFilteredPhaseData()
       const displayData = getDisplayData(currentPhase)
+      // Build unified Provider series (UL before Jan-22, UL + A+O at Jan-22, A+O after Jan-22)
+      const janIndex = displayData.months.indexOf('Jan-22')
+      const providerBefore: (number | null)[] = []
+      const providerAfter: (number | null)[] = []
+      for (let i = 0; i < displayData.months.length; i++) {
+        const ulVal = displayData.ulTests ? displayData.ulTests[i] : null
+        const aoVal = displayData.areebaOummal ? displayData.areebaOummal[i] : null
+        if (janIndex === -1) {
+          // Fallback: prefer A+O if exists else UL
+            providerBefore.push(ulVal)
+            providerAfter.push(aoVal)
+          continue
+        }
+        if (i < janIndex) {
+          providerBefore.push(ulVal)
+          providerAfter.push(null)
+        } else if (i === janIndex) {
+          // Sum at January transition
+          const summed = (ulVal ?? 0) + (aoVal ?? 0)
+          providerBefore.push(summed)
+          providerAfter.push(summed)
+        } else { // after Jan
+          providerBefore.push(null)
+          providerAfter.push(aoVal)
+        }
+      }
+      // Midpoint separator between Jan-22 and Feb-22 (dynamic & RTL aware)
+      const janBoundary = janIndex !== -1
+        ? (isRTL ? Math.max(janIndex - 0.5, 0.25) : janIndex + 0.5)
+        : 18.5
+      // Position (slightly offset) for vertical separator showing UL -> Areeba+Oummal transition
+      const ulAreebaTransitionPosition = (() => {
+        if (janIndex === -1) return null
+        // Larger offset so the line is more noticeably to the right of Jan (or left in RTL).
+        // 0.0  = exactly on Jan, 0.5 = midpoint between Jan & Feb. We choose 0.42.
+        const offset = 0.42
+        return isRTL ? Math.max(janIndex - offset, 0.02) : janIndex + offset
+      })()
 
       const option: echarts.EChartsOption = {
         title: {
@@ -384,13 +422,26 @@
                 valueMap[p.seriesName] = p.value
               }
             })
-
             const manifest = valueMap['Manifest']
             const estimated = valueMap['Estimated']
-            const ul = valueMap['UL']
             const currency = valueMap['Currency Rate']
             const sayrafa = valueMap['Sayrafa Rate']
-            const aoVal = valueMap['Areeba+Oummal']
+            // Derive UL & A+O values directly from underlying arrays so they are available even if not plotted as separate lines
+            const axisMonth = params[0]?.axisValue
+            const monthIdx = displayData.months.indexOf(axisMonth)
+            const ul = monthIdx >= 0 ? displayData.ulTests[monthIdx] : null
+            const aoVal = monthIdx >= 0 && displayData.areebaOummal ? displayData.areebaOummal[monthIdx] : null
+            // Provider combined (for information only)
+            let providerVal: number | null = null
+            if (monthIdx >= 0) {
+              if (janIndex !== -1) {
+                if (monthIdx < janIndex) providerVal = ul
+                else if (monthIdx === janIndex) providerVal = (ul ?? 0) + (aoVal ?? 0)
+                else providerVal = aoVal
+              } else {
+                providerVal = aoVal ?? ul
+              }
+            }
 
             // Differences (always absolute, never show negative signs)
             // Manifest vs Estimated
@@ -430,6 +481,7 @@
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin:4px 0"></div>` +
               `<div><span style=\"color:#7c3aed">Areeba+Oummal:</span> ${fmt(aoVal)}</div>` +
               `<div><span style=\"color:#7c3aed">Difference (A+O - Manifest):</span> ${fmt(diffAreebaManifest)}</div>` +
+              `<div><span style="color:${isDarkMode ? '#334155' : '#475569'}">Provider (plotted):</span> ${fmt(providerVal)}</div>` +
               `<div><span style=\"color:#dc2626">Currency:</span> ${fmt(currency, 'LBP')}</div>` +
               `<div><span style="color:#16a34a">Sayrafa:</span> ${fmt(sayrafa, 'LBP')}</div>` +
               `<div><span style="color:${isDarkMode ? '#f97316' : '#ea580c'}">Difference:</span> ${fmt(diffMarketSayrafa, 'LBP')}</div>` +
@@ -663,6 +715,67 @@
               }) as any
             ]
           })() : []),
+          // Phase 2 explicit end marker (Jan 9, 2022) to clarify that Phase 2 includes a partial Jan-22
+          ...(selectedPhase === 'phase2' ? [
+            {
+              name: 'Phase 2 End (Jan 9)',
+              type: 'line' as const,
+              xAxisIndex: 0,
+              yAxisIndex: 0,
+              data: [],
+              silent: true,
+              showSymbol: false,
+              lineStyle: { opacity: 0 },
+              markLine: {
+                symbol: 'none',
+                animation: false,
+                lineStyle: {
+                  color: '#7c3aed',
+                  width: 2,
+                  type: 'solid' as const,
+                  opacity: 0.9
+                },
+                label: {
+                  show: true,
+                  position: 'insideEndTop',
+                  formatter: 'Ends Jan 9 (UL)',
+                  color: '#7c3aed',
+                  fontSize: 11,
+                  fontWeight: 'bold'
+                },
+                data: [ { xAxis: 'Jan-22' } ]
+              }
+            },
+            {
+              name: 'Phase 2 End (Jan 9) Exchange',
+              type: 'line' as const,
+              xAxisIndex: 1,
+              yAxisIndex: 1,
+              data: [],
+              silent: true,
+              showSymbol: false,
+              lineStyle: { opacity: 0 },
+              markLine: {
+                symbol: 'none',
+                animation: false,
+                lineStyle: {
+                  color: '#7c3aed',
+                  width: 2,
+                  type: 'solid' as const,
+                  opacity: 0.9
+                },
+                label: {
+                  show: true,
+                  position: 'insideEndBottom',
+                  formatter: 'Ends Jan 9',
+                  color: '#7c3aed',
+                  fontSize: 10,
+                  fontWeight: 'bold'
+                },
+                data: [ { xAxis: 'Jan-22' } ]
+              }
+            }
+          ] : []),
           ...(differenceVisibility.areebaManifest && seriesVisibility.areebaOummal && seriesVisibility.manifest ? (() => {
             const m = displayData.arrivals as (number|null)[]
             const ao = displayData.areebaOummal as (number|null)[]
@@ -815,17 +928,44 @@
             },
           },
           {
-            name: "Areeba+Oummal",
+            name: "Provider (UL → A+O)",
             type: "line",
             xAxisIndex: 0,
             yAxisIndex: 0,
-            data: seriesVisibility.areebaOummal ? displayData.areebaOummal : [],
+            data: providerBefore,
             smooth: true,
             connectNulls: false,
-            lineStyle: { width: 2, type: 'solid' },
-            itemStyle: { color: '#7c3aed' },
-            areaStyle: fillVisibility.areebaOummal ? { opacity: 0.1, color: '#7c3aed' } : undefined,
-            emphasis: { focus: 'series' }
+            lineStyle: {
+              width: 3,
+              color: '#3b82f6'
+            },
+            itemStyle: {
+              color: "#3b82f6",
+            },
+            areaStyle: undefined,
+            emphasis: {
+              focus: "series",
+            },
+          },
+          {
+            name: "Provider (A+O)",
+            type: "line",
+            xAxisIndex: 0,
+            yAxisIndex: 0,
+            data: providerAfter,
+            smooth: true,
+            connectNulls: false,
+            lineStyle: {
+              width: 3,
+              color: '#7c3aed'
+            },
+            itemStyle: {
+              color: "#7c3aed",
+            },
+            areaStyle: undefined,
+            emphasis: {
+              focus: "series",
+            },
           },
           {
             name: "Estimated",
@@ -844,28 +984,6 @@
             areaStyle: fillVisibility.estimated ? {
               opacity: 0.1,
               color: "#000000",
-            } : undefined,
-            emphasis: {
-              focus: "series",
-            },
-          },
-          {
-            name: "UL",
-            type: "line",
-            xAxisIndex: 0,
-            yAxisIndex: 0,
-            data: seriesVisibility.ul ? displayData.ulTests : [],
-            smooth: true,
-            connectNulls: false,
-            lineStyle: {
-              width: 3,
-            },
-            itemStyle: {
-              color: "#3b82f6",
-            },
-            areaStyle: fillVisibility.ul ? {
-              opacity: 0.1,
-              color: "#3b82f6",
             } : undefined,
             emphasis: {
               focus: "series",
@@ -990,9 +1108,12 @@
                 data: [ { xAxis: 11.5 } ]
               }
             },
-            // Phase 2 to Phase 3 separator (after Dec-21, before Jan-22) - SPECIAL SEPARATOR
+            // (Removed Phase 2-3 separator as requested)
+          ] : []),
+          // UL -> Areeba+Oummal transition vertical separator (shown when Jan-22 and both providers context are relevant)
+          ...((ulAreebaTransitionPosition !== null) && (selectedPhase === 'all' || selectedPhase === 'phase3') ? [
             {
-              name: 'Phase 2-3 Separator (Arrivals)',
+              name: 'Transition from UL to Areeba+Oummal ',
               type: 'line' as const,
               xAxisIndex: 0,
               yAxisIndex: 0,
@@ -1007,21 +1128,21 @@
                   color: '#7c3aed',
                   width: 2,
                   type: 'solid' as const,
-                  opacity: 0.8
+                  opacity: 0.9
                 },
                 label: {
                   show: true,
                   position: 'insideEndTop',
-                  formatter: 'UL → Areeba+Oummal',
+                  formatter: 'Transition from UL to A+O',
                   color: '#7c3aed',
-                  fontSize: 11,
+                  fontSize: 8,
                   fontWeight: 'bold'
                 },
-                data: [ { xAxis: 17.5 } ] // Between Dec-21 (index 17) and Jan-22 (index 18)
+                data: [ { xAxis: ulAreebaTransitionPosition } ]
               }
             },
             {
-              name: 'Phase 2-3 Separator (Exchange)',
+              name: 'UL→A+O Transition (Exchange)',
               type: 'line' as const,
               xAxisIndex: 1,
               yAxisIndex: 1,
@@ -1036,17 +1157,17 @@
                   color: '#7c3aed',
                   width: 2,
                   type: 'solid' as const,
-                  opacity: 0.8
+                  opacity: 0.9
                 },
                 label: {
                   show: true,
                   position: 'insideEndBottom',
-                  formatter: 'Provider Transition',
+                  formatter: 'UL → A+O',
                   color: '#7c3aed',
                   fontSize: 10,
                   fontWeight: 'bold'
                 },
-                data: [ { xAxis: 17.5 } ]
+                data: [ { xAxis: ulAreebaTransitionPosition } ]
               }
             }
           ] : []),
