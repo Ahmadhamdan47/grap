@@ -428,7 +428,8 @@
           lineStyle: {
             type: 'solid',
             width: 2,
-            color: isDarkMode ? '#fbbf24' : '#10b981' // Yellow in dark mode, green in light mode
+            // Unified highlight color
+            color: '#CCFF00'
           }
         },
         toolbox: {
@@ -596,8 +597,8 @@
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
-                  // Purple overlay for Manifest vs Estimated difference
-                  areaStyle: { color: isDarkMode ? 'rgba(167,139,250,0.45)' : 'rgba(139,92,246,0.30)', opacity: 0.55 },
+                  // Unified difference overlay color
+                  areaStyle: { color: 'rgba(204,255,0,0.45)', opacity: 0.55 },
                 emphasis: { disabled: true },
                 tooltip: { show: false },
                 z: -1
@@ -639,8 +640,8 @@
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
-                // NEW COLOR: Cyan/Teal overlay for UL vs Estimated difference
-                areaStyle: { color: isDarkMode ? 'rgba(34,211,238,0.45)' : 'rgba(6,182,212,0.35)', opacity: 0.55 },
+                // Unified difference overlay color
+                areaStyle: { color: 'rgba(204,255,0,0.45)', opacity: 0.55 },
                 emphasis: { disabled: true },
                 tooltip: { show: false },
                 z: -1
@@ -683,8 +684,8 @@
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
-                // NEW COLOR: Orange overlay for Market vs Sayrafa difference
-                areaStyle: { color: isDarkMode ? 'rgba(229, 255, 0, 1)' : 'rgba(229, 255, 0, 1)', opacity: 0.6 },
+                // Unified difference overlay color
+                areaStyle: { color: 'rgba(204,255,0,0.45)', opacity: 0.55 },
                 emphasis: { disabled: true },
                 tooltip: { show: false },
                 z: -1
@@ -783,17 +784,17 @@
               silent: true,
               symbol: 'none',
               lineStyle: {
-                color: '#666',
+                color: '#CCFF00',
                 width: 2,
-                type: 'dotted'
+                type: 'solid'
               },
               data: [{
                 yAxis: 1515,
                 label: {
                   show: true,
                   position: 'insideEndTop',
-                  formatter: '1515 LBP',
-                  color: '#666',
+                  formatter: '1515 LBP', // baseline
+                  color: '#222',
                   fontSize: 12
                 }
               }]
@@ -836,7 +837,7 @@
               symbol: 'none',
               animation: false,
               lineStyle: {
-                color: isDarkMode ? '#fbbf24' : '#10b981', // Yellow in dark mode, green in light mode
+                color: '#CCFF00',
                 width: 2,
                 type: 'solid' as const
               },
@@ -856,7 +857,7 @@
                 symbol: 'none',
                 animation: false,
                 lineStyle: {
-                  color: isDarkMode ? '#fbbf24' : '#10b981', // Yellow in dark mode, green in light mode
+                  color: '#CCFF00',
                   width: 2,
                   type: 'solid' as const
                 },
