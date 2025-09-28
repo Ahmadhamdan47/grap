@@ -73,6 +73,30 @@ export default function InOutPage() {
           }
         }
       ],
+      graphic: [
+        {
+          type: 'text',
+          left: '5%',
+          top: '30%',
+          style: {
+            text: 'IN',
+            fontSize: 18,
+            fontWeight: 'bold',
+            fill: '#333'
+          }
+        },
+        {
+          type: 'text',
+          right: '5%',
+          top: '30%',
+          style: {
+            text: 'OUT',
+            fontSize: 18,
+            fontWeight: 'bold',
+            fill: '#333'
+          }
+        }
+      ],
       series: [
         {
           name: 'Payer (Debit)',
@@ -106,7 +130,9 @@ export default function InOutPage() {
           label: {
             show: true,
             position: 'outside',
-            formatter: '{b}\n{d}%',
+            formatter: function(params: any) {
+              return `${params.name}\n$${params.value.toLocaleString()}\n(${params.percent}%)`
+            },
             fontSize: 11
           },
           labelLine: {
@@ -144,7 +170,7 @@ export default function InOutPage() {
         <Card className="w-full">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-3xl">Analytical Comparison</CardTitle>
+              <CardTitle className="text-3xl">Financial Flow Analysis</CardTitle>
               <a 
                 href="/"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -152,6 +178,99 @@ export default function InOutPage() {
                 Back to Chart
               </a>
             </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Payer Summary Table */}
+              <div>
+             
+                <h4 className="text-md font-medium mb-4">Payer Sources (Debit)</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800">
+                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Payer</th>
+                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Debit</th>
+                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Airlines</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$192,515</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">65%</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">American Express</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$96,900</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">33%</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Border PCR</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,969</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">2%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Expense Summary Table */}
+              <div>
+             
+                <h4 className="text-md font-medium mb-4">Expense Types (Credit)</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800">
+                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Expense type</th>
+                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Credit</th>
+                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Treasury (MoF)</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$185,609</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">63%</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Human Resources (+MoF+NSSF)</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$78,042</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">26%</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Project operation supplies</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$19,156</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">6%</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Other (supplies, rent, tests..)</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$12,577</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">4%</td>
+                      </tr>
+                      <tr className="font-semibold bg-gray-50 dark:bg-gray-800">
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Total:</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$295,384</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">100%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Nested Pie Chart */}
+            <div className="w-full h-[600px] border rounded-lg">
+              <div ref={chartRef} className="w-full h-full" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Analytical Comparison Section */}
+        <Card className="w-full mt-8">
+          <CardHeader>
+            <CardTitle className="text-2xl">Analytical Comparison</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -273,96 +392,7 @@ export default function InOutPage() {
           </CardContent>
         </Card>
 
-        {/* Financial Flow Chart Section */}
-        <Card className="w-full mt-8">
-          <CardHeader>
-            <CardTitle className="text-2xl">Financial Flow Analysis</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Payer Summary Table */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Payer Sources (Debit)</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
-                    <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-800">
-                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Payer</th>
-                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Debit</th>
-                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Percentage</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Airlines</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$192,515</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">65%</td>
-                      </tr>
-                      <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">American Express</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$96,900</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">33%</td>
-                      </tr>
-                      <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Border PCR</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,969</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">2%</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
 
-              {/* Expense Summary Table */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Expense Types (Credit)</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
-                    <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-800">
-                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Expense type</th>
-                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Credit</th>
-                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Percentage</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Treasury (MoF)</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$185,609</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">63%</td>
-                      </tr>
-                      <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Human Resources (+MoF+NSSF)</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$78,042</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">26%</td>
-                      </tr>
-                      <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Project operation supplies</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$19,156</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">6%</td>
-                      </tr>
-                      <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Other (supplies, rent, tests..)</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$12,577</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">4%</td>
-                      </tr>
-                      <tr className="font-semibold bg-gray-50 dark:bg-gray-800">
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Total:</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$295,384</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">100%</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            {/* Nested Pie Chart */}
-            <div className="w-full h-96 border rounded-lg">
-              <div ref={chartRef} className="w-full h-full" />
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Operational Comparison Section */}
         <Card className="w-full mt-8">
