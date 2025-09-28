@@ -1188,7 +1188,7 @@
                 label: {
                   show: true,
                   position: 'insideEndTop',
-                  formatter: 'Transition from UL to A+O',
+                  formatter: 'Transition to 3rd phase',
                   color: '#7c3aed',
                   fontSize: 8,
                   fontWeight: 'bold'
@@ -1217,7 +1217,7 @@
                 label: {
                   show: true,
                   position: 'insideEndBottom',
-                  formatter: 'UL → A+O',
+                  formatter: 'transition to 3rd phase',
                   color: '#7c3aed',
                   fontSize: 10,
                   fontWeight: 'bold'
@@ -1459,7 +1459,7 @@
               )
             })()}
           </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={() => toggleSeries('manifest')}
               className={`text-center p-4 rounded-lg transition-all duration-200 ${
@@ -1583,56 +1583,187 @@
                 {seriesVisibility.exchangeRate ? 'Click to hide' : 'Click to show'}
               </div>
             </button>
-            <button
-              onClick={() => toggleSeries('sayrafaRate')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.sayrafaRate
-                  ? 'bg-green-50 dark:bg-green-950/20 hover:bg-green-100 dark:hover:bg-green-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.sayrafaRate ? 'text-green-600' : 'text-gray-400'
-              }`}>
-                {(() => {
-                  const currentPhase = getFilteredPhaseData()
-                  const validValues = currentPhase.sayrafaRates.filter((v): v is number => v !== null);
-                  if (validValues.length === 0) return 'N/A'
-                  const sum = validValues.reduce((acc, v) => acc + v, 0)
-                  const avgRate = Math.round(sum / validValues.length)
-                  return avgRate.toLocaleString() + ' LBP'
-                })()}
-              </div>
-              <div className="text-sm text-muted-foreground">Average Sayrafa Rate</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.sayrafaRate ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-            <button
-              onClick={() => toggleSeries('lollarRate')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.lollarRate
-                  ? 'bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.lollarRate ? 'text-amber-600' : 'text-gray-400'
-              }`}>
-                {(() => {
-                  const currentPhase = getFilteredPhaseData()
-                  const validValues = currentPhase.lollarRates.filter((v): v is number => v !== null);
-                  if (validValues.length === 0) return 'N/A'
-                  const sum = validValues.reduce((acc, v) => acc + v, 0)
-                  const avgRate = Math.round(sum / validValues.length)
-                  return avgRate.toLocaleString() + ' LBP'
-                })()}
-              </div>
-              <div className="text-sm text-muted-foreground">Lollar Rate</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.lollarRate ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
+          </div>
+          
+          {/* Polar Charts for Airline Distribution */}
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* 2021 Polar Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-center">2021 - Airlines Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full h-[500px]">
+                  <div ref={(ref) => {
+                    if (ref && !ref.hasAttribute('data-initialized-2021')) {
+                      const chart2021 = echarts.init(ref)
+                      ref.setAttribute('data-initialized-2021', 'true')
+                      
+                      const data2021 = [
+                        { name: 'Middle East Airline', value: 38 },
+                        { name: 'Turkish Airlines', value: 12 },
+                        { name: 'Emirates Airlines', value: 7 },
+                        { name: 'Qatar Airways', value: 5 },
+                        { name: 'Pegasus Airlines', value: 4 },
+                        { name: 'Iraqi Airways', value: 3 },
+                        { name: 'Air France', value: 3 },
+                        { name: 'Ethiopian Airlines', value: 3 },
+                        { name: 'Egypt Air', value: 3 },
+                        { name: 'SundAir', value: 2 },
+                        { name: 'Others', value: 21 }
+                      ]
+
+                      const option2021 = {
+                        angleAxis: {
+                          type: 'category',
+                          data: data2021.map(item => item.name),
+                          axisLabel: {
+                            fontSize: 12,
+                            rotate: 45
+                          }
+                        },
+                        radiusAxis: {
+                          min: 0,
+                          max: 40,
+                          axisLabel: {
+                            formatter: '{value}%',
+                            fontSize: 11
+                          }
+                        },
+                        polar: {
+                          radius: [30, '85%']
+                        },
+                        series: [{
+                          type: 'bar',
+                          data: data2021.map(item => item.value),
+                          coordinateSystem: 'polar',
+                          name: 'Distribution',
+                          itemStyle: {
+                            color: function(params: any) {
+                              const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
+                              return colors[params.dataIndex % colors.length]
+                            }
+                          },
+                          label: {
+                            show: true,
+                            position: 'middle',
+                            formatter: '{c}%',
+                            fontSize: 12,
+                            fontWeight: 'bold'
+                          }
+                        }],
+                        tooltip: {
+                          trigger: 'item',
+                          formatter: '{b}: {c}%'
+                        },
+                        legend: {
+                          show: false
+                        }
+                      }
+
+                      chart2021.setOption(option2021)
+                      
+                      const handleResize2021 = () => chart2021.resize()
+                      window.addEventListener('resize', handleResize2021)
+                      
+                      return () => {
+                        window.removeEventListener('resize', handleResize2021)
+                        chart2021.dispose()
+                      }
+                    }
+                  }} className="w-full h-full" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 2022 Polar Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-center">2022 - Airlines Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full h-[500px]">
+                  <div ref={(ref) => {
+                    if (ref && !ref.hasAttribute('data-initialized-2022')) {
+                      const chart2022 = echarts.init(ref)
+                      ref.setAttribute('data-initialized-2022', 'true')
+                      
+                      const data2022 = [
+                        { name: 'Middle East Airline', value: 39 },
+                        { name: 'Turkish Airlines', value: 10 },
+                        { name: 'Emirates Airlines', value: 6 },
+                        { name: 'Pegasus Airlines', value: 5 },
+                        { name: 'Qatar Airways', value: 4 },
+                        { name: 'Air France', value: 3 },
+                        { name: 'Egypt Air', value: 3 },
+                        { name: 'Iraqi Airways', value: 3 },
+                        { name: 'Lufthansa', value: 2 },
+                        { name: 'Royal Jordanian', value: 2 },
+                        { name: 'Others', value: 22 }
+                      ]
+
+                      const option2022 = {
+                        angleAxis: {
+                          type: 'category',
+                          data: data2022.map(item => item.name),
+                          axisLabel: {
+                            fontSize: 12,
+                            rotate: 45
+                          }
+                        },
+                        radiusAxis: {
+                          min: 0,
+                          max: 40,
+                          axisLabel: {
+                            formatter: '{value}%',
+                            fontSize: 11
+                          }
+                        },
+                        polar: {
+                          radius: [30, '85%']
+                        },
+                        series: [{
+                          type: 'bar',
+                          data: data2022.map(item => item.value),
+                          coordinateSystem: 'polar',
+                          name: 'Distribution',
+                          itemStyle: {
+                            color: function(params: any) {
+                              const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
+                              return colors[params.dataIndex % colors.length]
+                            }
+                          },
+                          label: {
+                            show: true,
+                            position: 'middle',
+                            formatter: '{c}%',
+                            fontSize: 12,
+                            fontWeight: 'bold'
+                          }
+                        }],
+                        tooltip: {
+                          trigger: 'item',
+                          formatter: '{b}: {c}%'
+                        },
+                        legend: {
+                          show: false
+                        }
+                      }
+
+                      chart2022.setOption(option2022)
+                      
+                      const handleResize2022 = () => chart2022.resize()
+                      window.addEventListener('resize', handleResize2022)
+                      
+                      return () => {
+                        window.removeEventListener('resize', handleResize2022)
+                        chart2022.dispose()
+                      }
+                    }
+                  }} className="w-full h-full" />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>
