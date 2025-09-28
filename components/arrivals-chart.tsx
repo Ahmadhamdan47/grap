@@ -40,12 +40,12 @@
 
   // Function to process Sayrafa CSV data
   const processSayrafaData = () => {
-    // Sayrafa monthly averages for our chart timeframe (Jul 2021 - Feb 2022)
-    // Phase 3 now limited to Feb 28, 2022 (only Feb-22 in phase3)
+    // Sayrafa monthly averages for our chart timeframe (Jul 2021 - Jul 2022)
+    // Phase 3 now extended through July 2022
     return {
       all: [
-        // Phase 1 (no Sayrafa data available)
-        null, null, null, null, null, null, null, null, null, null, null, null,
+        // Phase 1 (pre-Sayrafa period - using official rate of 1515)
+        1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515,
         // Phase 2 (Jul 2021 - Jan 2022) - Sayrafa monthly averages (recomputed rounded)
         15250,  // Jul-21 avg
         16628,  // Aug-21 avg
@@ -54,18 +54,23 @@
         18705,  // Nov-21 avg
         21495,  // Dec-21 avg
         23381,  // Jan-22 avg
-        // Phase 3 (Feb 2022 ONLY - limited to Feb 28)
+        // Phase 3 (Feb 2022 - Jul 2022) - Extended data
         20539,  // Feb-22 avg
+        21041,  // Mar-22 avg
+        22429,  // Apr-22 avg
+        23453,  // May-22 avg
+        24781,  // Jun-22 avg
+        25480,  // Jul-22 avg
       ],
-      phase1: [null, null, null, null, null, null, null, null, null, null, null, null],
+      phase1: [1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515],
       phase2: [15250, 16628, 14740, 16479, 18705, 21495, 23381],
-      phase3: [20539],  // Feb-22 only
+      phase3: [20539, 21041, 22429, 23453, 24781, 25480],  // Feb-22 through Jul-22
     }
   }
 
   const sayrafaRateData = processSayrafaData()
 
-  // USD to LBP exchange rate data (monthly averages from CSV) - Phase 3 limited to Feb 2022 only
+  // USD to LBP exchange rate data (monthly averages from CSV) - Phase 3 extended through Jul 2022
   const exchangeRateData = {
     all: [
       // Phase 1 rates (Jul 2020 - Jun 2021)
@@ -73,29 +78,37 @@
       -8762, -9138, -11708, -12201, -12713, -15274, // Jan-Jun 2021
       // Phase 2 rates (Jul 2021 - Jan 2022)
       -19408, -19587, -16479, -19691, -22900, -25911, -26493, // Jul 2021 - Jan 2022
-      // Phase 3 rates (Feb 2022 ONLY) monthly average (negative for below-axis plotting)
+      // Phase 3 rates (Feb 2022 - Jul 2022) monthly averages (negative for below-axis plotting)
       -20926, // Feb-22
+      -22945, // Mar-22
+      -25760, // Apr-22
+      -29595, // May-22
+      -28607, // Jun-22
+      -29546, // Jul-22
     ],
     phase1: [-8081, -7433, -7686, -7803, -7820, -8286, -8762, -9138, -11708, -12201, -12713, -15274],
     phase2: [-19408, -19587, -16479, -19691, -22900, -25911, -26493],
-    phase3: [-20926], // Feb-22 only
+    phase3: [-20926, -22945, -25760, -29595, -28607, -29546], // Feb-22 through Jul-22
   }
 
-  // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Feb-22) with a leading Jul-20 null for alignment (trimmed after Feb-22)
+  // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Jul-22) with a leading Jul-20 null for alignment (extended to include full data)
   const fullMonths = [
     'Jul-20','Aug-20','Sep-20','Oct-20','Nov-20','Dec-20',
     'Jan-21','Feb-21','Mar-21','Apr-21','May-21','Jun-21',
-    'Jul-21','Aug-21','Sep-21','Oct-21','Nov-21','Dec-21','Jan-22','Feb-22'
+    'Jul-21','Aug-21','Sep-21','Oct-21','Nov-21','Dec-21','Jan-22','Feb-22',
+    'Mar-22','Apr-22','May-22','Jun-22','Jul-22'
   ]
   const manifestAll: (number|null)[] = [
     null,
     74366,81928,109267,99776,155020,67076,67395,101113,107240,153360,234519,
-    355979,208033,183225,192837,156665,242955,153230,159970
+    355979,208033,183225,192837,156665,242955,153230,159970,
+    201536,411037,380559,340317,460018
   ]
   const estimatedAll: (number|null)[] = [
     null,
     69604,76772,102471,93489,145479,62851,63151,94796,100556,143858,219848,
-    333620,195051,171831,180867,146765,227978,143836,150172
+    333620,195051,171831,180867,146765,227978,143836,150172,
+    null,null,null,null,null
   ]
   const ulAll: (number|null)[] = [
     null, // Jul-20
@@ -103,6 +116,7 @@
     null,null,null,null,null,null, // Jan21-Jun21
     255958,149581,131744,138655,112646,174691,36725, // Jul21-Jan22
     null, // Feb-22
+    null,null,null,null,null // Mar22-Jul22
   ]
   const areebaOummalAll: (number|null)[] = [
     null, // Jul-20
@@ -111,13 +125,14 @@
     null,null,null,null,null,null, // Jul21-Dec21
     74605, // Jan-22
     151443, // Feb-22
+    null,null,null,null,null // Mar22-Jul22
   ]
 
-  // Phase definitions (extended all-phase; other phases kept for original segmentation)
+  // Phase definitions (extended all-phase; phase3 now includes full data through Jul 2022)
   const phases = {
     all: {
       name: "All Phases",
-      period: "01-07-2020 to 28-02-2022",
+      period: "01-07-2020 to 31-07-2022",
       months: fullMonths,
       arrivals: manifestAll,
       estimatedArrivals: estimatedAll,
@@ -154,13 +169,13 @@
     phase3: {
       name: "Phase 3",
       period: "10-01-2022 to 28-02-2022 (Areeba+Oummal starts Jan 10)",
-      months: fullMonths.slice(18), // Jan-22 and Feb-22 (Phase 3 starts Jan 10)
-      arrivals: manifestAll.slice(18),
-      estimatedArrivals: estimatedAll.slice(18), 
-      ulTests: ulAll.slice(18),
-      areebaOummal: areebaOummalAll.slice(18),
-      exchangeRates: exchangeRateData.phase2.slice(6).concat(exchangeRateData.phase3), // Jan-22 and Feb-22
-      sayrafaRates: sayrafaRateData.phase2.slice(6).concat(sayrafaRateData.phase3), // Jan-22 and Feb-22
+      months: fullMonths.slice(18, 20), // Jan-22 and Feb-22 only (Phase 3 original scope)
+      arrivals: manifestAll.slice(18, 20),
+      estimatedArrivals: estimatedAll.slice(18, 20), 
+      ulTests: ulAll.slice(18, 20),
+      areebaOummal: areebaOummalAll.slice(18, 20),
+      exchangeRates: exchangeRateData.phase2.slice(6).concat(exchangeRateData.phase3.slice(0, 1)), // Jan-22 and Feb-22 only
+      sayrafaRates: sayrafaRateData.phase2.slice(6).concat(sayrafaRateData.phase3.slice(0, 1)), // Jan-22 and Feb-22 only
     },
   }
 
@@ -169,7 +184,6 @@
     const chartInstance = useRef<echarts.ECharts | null>(null)
     const [selectedPhase, setSelectedPhase] = useState<keyof typeof phases>("all")
     const [isDarkMode, setIsDarkMode] = useState(false)
-    const [isRTL, setIsRTL] = useState(false)
     // Selected data index (month) for showing detailed values
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
     const [seriesVisibility, setSeriesVisibility] = useState({
@@ -297,22 +311,7 @@
       return filteredData
     }
 
-    // Transform data for RTL display (reverse arrays if RTL is enabled)
-    const getDisplayData = (phaseData: any) => {
-      if (!isRTL) {
-        return phaseData
-      }
-      
-      return {
-        ...phaseData,
-        months: [...phaseData.months].reverse(),
-        arrivals: [...phaseData.arrivals].reverse(),
-        estimatedArrivals: [...phaseData.estimatedArrivals].reverse(),
-        ulTests: [...phaseData.ulTests].reverse(),
-        exchangeRates: [...phaseData.exchangeRates].reverse(),
-        sayrafaRates: [...phaseData.sayrafaRates].reverse(),
-      }
-    }
+
 
     useEffect(() => {
       if (!chartRef.current) return
@@ -320,11 +319,6 @@
       // Initialize chart
       chartInstance.current = echarts.init(chartRef.current, isDarkMode ? "dark" : undefined)
       
-      // Set RTL for chart content if needed
-      if (isRTL) {
-        chartInstance.current.getDom().style.direction = 'rtl'
-      }
-
       // Handle resize
       const handleResize = () => {
         chartInstance.current?.resize()
@@ -335,13 +329,13 @@
         window.removeEventListener("resize", handleResize)
         chartInstance.current?.dispose()
       }
-    }, [isDarkMode, isRTL])
+    }, [isDarkMode])
 
     useEffect(() => {
       if (!chartInstance.current) return
 
       const currentPhase = getFilteredPhaseData()
-      const displayData = getDisplayData(currentPhase)
+      const displayData = currentPhase
       // Build unified Provider series (UL before Jan-22, UL + A+O at Jan-22, A+O after Jan-22)
       const janIndex = displayData.months.indexOf('Jan-22')
       const providerBefore: (number | null)[] = []
@@ -368,17 +362,17 @@
           providerAfter.push(aoVal)
         }
       }
-      // Midpoint separator between Jan-22 and Feb-22 (dynamic & RTL aware)
+      // Midpoint separator between Jan-22 and Feb-22
       const janBoundary = janIndex !== -1
-        ? (isRTL ? Math.max(janIndex - 0.5, 0.25) : janIndex + 0.5)
+        ? janIndex + 0.5
         : 18.5
       // Position (slightly offset) for vertical separator showing UL -> Areeba+Oummal transition
       const ulAreebaTransitionPosition = (() => {
         if (janIndex === -1) return null
-        // Larger offset so the line is more noticeably to the right of Jan (or left in RTL).
+        // Larger offset so the line is more noticeably to the right of Jan.
         // 0.0  = exactly on Jan, 0.5 = midpoint between Jan & Feb. We choose 0.42.
         const offset = 0.42
-        return isRTL ? Math.max(janIndex - offset, 0.02) : janIndex + offset
+        return janIndex + offset
       })()
 
       const option: echarts.EChartsOption = {
@@ -393,8 +387,10 @@
         },
         tooltip: {
           trigger: "axis",
+          triggerOn: "mousemove|click",
           axisPointer: {
             type: "cross",
+            snap: true,
             label: {
               backgroundColor: "#6a7985",
             },
@@ -433,13 +429,22 @@
             const aoVal = monthIdx >= 0 && displayData.areebaOummal ? displayData.areebaOummal[monthIdx] : null
             // Provider combined (for information only)
             let providerVal: number | null = null
+            let providerInfo = ''
             if (monthIdx >= 0) {
               if (janIndex !== -1) {
-                if (monthIdx < janIndex) providerVal = ul
-                else if (monthIdx === janIndex) providerVal = (ul ?? 0) + (aoVal ?? 0)
-                else providerVal = aoVal
+                if (monthIdx < janIndex) {
+                  providerVal = ul
+                  providerInfo = 'UL'
+                } else if (monthIdx === janIndex) {
+                  providerVal = (ul ?? 0) + (aoVal ?? 0)
+                  providerInfo = 'UL and Areeba+Oummal total'
+                } else {
+                  providerVal = aoVal
+                  providerInfo = 'Areeba+Oummal'
+                }
               } else {
                 providerVal = aoVal ?? ul
+                providerInfo = aoVal ? 'Areeba+Oummal' : 'UL'
               }
             }
 
@@ -458,34 +463,40 @@
               return v.toLocaleString() + (unit ? ` ${unit}` : '')
             }
 
-            // Build ordered custom layout:
+            // Build ordered custom layout according to user requirements:
             // Manifest
+            // Estimated 
+            // Difference between Manifest and estimated
             // ---
-            // Estimated
+            // Estimated 
             // UL
-            // Difference (UL - Estimated)
+            // Difference between Estimated and UL
+            // ---
+            // Estimated 
+            // 3rd Phase (Areeba+Oummal)
+            // Difference
             // ---
             // Market
             // Sayrafa
-            // Difference (Market - Sayrafa)
-            // ---
+            // Difference
 
             let html = `<div style="min-width:170px">` +
               `<div style="font-weight:600;margin-bottom:4px">${params[0]?.axisValue ?? ''}</div>` +
               `<div><span style="color:#6b7280">Manifest:</span> ${fmt(manifest)}</div>` +
+              `<div><span style="color:#111827">Estimated:</span> ${fmt(estimated)}</div>` +
+              `<div><span style="color:${isDarkMode ? '#c4b5fd' : '#8b5cf6'}">Difference between Manifest and estimated:</span> ${fmt(diffManifestEstimated)}</div>` +
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin:4px 0"></div>` +
               `<div><span style="color:#111827">Estimated:</span> ${fmt(estimated)}</div>` +
-              `<div><span style="color:${isDarkMode ? '#c4b5fd' : '#8b5cf6'}">Difference (Estimated - Manifest):</span> ${fmt(diffManifestEstimated)}</div>` +
               `<div><span style="color:#2563eb">UL:</span> ${fmt(ul)}</div>` +
-              `<div><span style="color:${isDarkMode ? '#6366f1' : '#4f46e5'}">Difference (UL - Estimated):</span> ${fmt(diffULvsEstimated)}</div>` +
+              `<div><span style="color:${isDarkMode ? '#6366f1' : '#4f46e5'}">Difference between Estimated and UL:</span> ${fmt(diffULvsEstimated)}</div>` +
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin:4px 0"></div>` +
-              `<div><span style=\"color:#7c3aed">Areeba+Oummal:</span> ${fmt(aoVal)}</div>` +
-              `<div><span style=\"color:#7c3aed">Difference (A+O - Manifest):</span> ${fmt(diffAreebaManifest)}</div>` +
-              `<div><span style="color:${isDarkMode ? '#334155' : '#475569'}">Provider (plotted):</span> ${fmt(providerVal)}</div>` +
-              `<div><span style=\"color:#dc2626">Currency:</span> ${fmt(currency, 'LBP')}</div>` +
+              `<div><span style="color:#111827">Estimated:</span> ${fmt(estimated)}</div>` +
+              `<div><span style=\"color:#7c3aed">3rd Phase:</span> ${fmt(aoVal)}</div>` +
+              `<div><span style=\"color:#7c3aed">Difference:</span> ${fmt(diffAreebaManifest)}</div>` +
+              `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin:4px 0"></div>` +
+              `<div><span style=\"color:#dc2626">Market:</span> ${fmt(currency, 'LBP')}</div>` +
               `<div><span style="color:#16a34a">Sayrafa:</span> ${fmt(sayrafa, 'LBP')}</div>` +
               `<div><span style="color:${isDarkMode ? '#f97316' : '#ea580c'}">Difference:</span> ${fmt(diffMarketSayrafa, 'LBP')}</div>` +
-              `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin-top:4px"></div>` +
               `</div>`
             return html
           },
@@ -498,16 +509,16 @@
         grid: [
           {
             id: 'arrivals',
-            left: isRTL ? "3%" : "6%",
-            right: isRTL ? "6%" : "3%", 
+            left: "6%",
+            right: "3%", 
             bottom: "55%",
             top: 80,
             containLabel: true,
           },
           {
             id: 'exchange',
-            left: isRTL ? "3%" : "6%",
-            right: isRTL ? "6%" : "3%",
+            left: "6%",
+            right: "3%",
             bottom: "15%",
             top: "55%",
             containLabel: true,
@@ -582,7 +593,7 @@
             gridIndex: 0,
             type: "value",
             name: "Arrivals",
-            position: isRTL ? "right" : "left",
+            position: "left",
             min: 0,
             // Phase 3 has lower ceiling requirements -> 200k max with 25k ticks
             max: selectedPhase === 'phase3' ? 200000 : 500000,
@@ -612,7 +623,7 @@
             gridIndex: 1, 
             type: "value",
             name: "Currency Rate",
-            position: isRTL ? "right" : "left",
+            position: "left",
             boundaryGap: [1.20, 1.20],
             min: 1515,
             max: 30000,
@@ -1242,12 +1253,32 @@
       chartInstance.current.on('click', (params: any) => {
         if (typeof params.dataIndex === 'number') {
           setSelectedIndex(params.dataIndex)
-          // Manually dispatch an updateAxisPointer so the vertical line remains
+          // Lock the axisPointer to the exact data point position
           chartInstance.current?.dispatchAction({
             type: 'updateAxisPointer',
             currTrigger: 'click',
-            xAxisIndex: [0,1],
-            position: params.event?.offsetX
+            xAxisIndex: [0, 1],
+            dataIndex: params.dataIndex
+          })
+          // Show tooltip at the exact position
+          chartInstance.current?.dispatchAction({
+            type: 'showTip',
+            seriesIndex: params.seriesIndex,
+            dataIndex: params.dataIndex
+          })
+        }
+      })
+
+      // Prevent tooltip from moving on slight mouse movements when a point is selected
+      chartInstance.current.off('mousemove')
+      chartInstance.current.on('mousemove', (params: any) => {
+        if (selectedIndex !== null) {
+          // Keep the axisPointer locked to the selected point
+          chartInstance.current?.dispatchAction({
+            type: 'updateAxisPointer',
+            currTrigger: 'click',
+            xAxisIndex: [0, 1], 
+            dataIndex: selectedIndex
           })
         }
       })
@@ -1263,10 +1294,10 @@
           dataIndex: selectedIndex
         })
       }
-  }, [selectedPhase, isDarkMode, isRTL, seriesVisibility, fillVisibility, phaseVisibility, selectedIndex, differenceVisibility])
+  }, [selectedPhase, isDarkMode, seriesVisibility, fillVisibility, phaseVisibility, selectedIndex, differenceVisibility])
 
     return (
-      <Card className={`w-full ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <Card className="w-full">
         <CardHeader>
           <div className="flex flex-col gap-4">
             <CardTitle className="text-2xl text-center">Interactive Arrivals Chart & USD to LBP Exchange Rates</CardTitle>
@@ -1305,45 +1336,35 @@
               <button
                 onClick={() => toggleDifference('manifestEstimated')}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.manifestEstimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
-              >M vs E</button>
+              >Manifest vs Estimated</button>
               <button
                 onClick={() => toggleDifference('estimatedUL')}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.estimatedUL ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'}`}
-              >UL vs E</button>
+              >UL vs Estimated</button>
               <button
                 onClick={() => toggleDifference('marketSayrafa')}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.marketSayrafa ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}`}
-              >Currency vs Sayrafa</button>
+              >Market vs Sayrafa</button>
               <button
                 onClick={() => toggleDifference('areebaManifest')}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}
-              >A+O vs M</button>
+              >Estimated vs 3rd phase</button>
             </div>
 
             {/* Area Fill Toggles */}
             <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
               <span className="text-xs uppercase tracking-wide text-muted-foreground mr-2">Area Fill:</span>
               <button onClick={() => toggleFill('manifest')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.manifest ? 'bg-gray-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>Manifest</button>
-              <button onClick={() => toggleFill('areebaOummal')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.areebaOummal ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}>A+O</button>
-              <button onClick={() => toggleFill('estimated')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.estimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>Estimated</button>
               <button onClick={() => toggleFill('ul')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.ul ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'}`}>UL</button>
-              <button onClick={() => toggleFill('exchangeRate')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.exchangeRate ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}`}>Currency</button>
+                            <button onClick={() => toggleFill('estimated')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.estimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>Estimated</button>
+              <button onClick={() => toggleFill('areebaOummal')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.areebaOummal ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}>3rd Phase</button>
+
+              
+              <button onClick={() => toggleFill('exchangeRate')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.exchangeRate ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}`}>Market</button>
               <button onClick={() => toggleFill('sayrafaRate')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.sayrafaRate ? 'bg-green-600 text-white' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}`}>Sayrafa</button>
             </div>
 
-            {/* RTL Toggle */}
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setIsRTL(!isRTL)}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  isRTL
-                    ? 'bg-orange-600 text-white hover:bg-orange-700'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                {isRTL ? '✓ RTL Layout' : '○ RTL Layout'}
-              </button>
-            </div>
+
 
             <p className="text-sm text-muted-foreground text-center">
               Currency rate displayed at bottom (1515-30000 LBP), arrivals data above with separate scales. 
@@ -1358,7 +1379,7 @@
           <div className="mt-4 p-4 rounded-lg border bg-muted/30 text-sm">
             {(() => {
               const currentPhase = getFilteredPhaseData()
-              const displayData = getDisplayData(currentPhase)
+              const displayData = currentPhase
               if (selectedIndex === null || !displayData.months[selectedIndex]) {
                 return <span className="text-muted-foreground">Click a point to lock the vertical line and see that month's values.</span>
               }
@@ -1410,31 +1431,7 @@
                 {seriesVisibility.manifest ? 'Click to hide' : 'Click to show'}
               </div>
             </button>
-            <button
-              onClick={() => toggleSeries('areebaOummal')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.areebaOummal
-                  ? 'bg-purple-50 dark:bg-purple-950/20 hover:bg-purple-100 dark:hover:bg-purple-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.areebaOummal ? 'text-purple-600' : 'text-gray-400'
-              }`}>
-                {(() => {
-                  const currentPhase = getFilteredPhaseData()
-                  if (!currentPhase.areebaOummal) return '—'
-                  const validValues = currentPhase.areebaOummal.filter((v: number | null): v is number => v != null)
-                  if (!validValues.length) return '—'
-                  const sum = validValues.reduce((a:number,b:number)=>a+b,0)
-                  return sum.toLocaleString()
-                })()}
-              </div>
-              <div className="text-sm text-muted-foreground">Total Areeba+Oummal</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.areebaOummal ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
+
             <button
               onClick={() => toggleSeries('estimated')}
               className={`text-center p-4 rounded-lg transition-all duration-200 ${
@@ -1483,6 +1480,31 @@
                 {seriesVisibility.ul ? 'Click to hide' : 'Click to show'}
               </div>
             </button>
+                        <button
+              onClick={() => toggleSeries('areebaOummal')}
+              className={`text-center p-4 rounded-lg transition-all duration-200 ${
+                seriesVisibility.areebaOummal
+                  ? 'bg-purple-50 dark:bg-purple-950/20 hover:bg-purple-100 dark:hover:bg-purple-950/30'
+                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+              }`}
+            >
+              <div className={`text-2xl font-bold ${
+                seriesVisibility.areebaOummal ? 'text-purple-600' : 'text-gray-400'
+              }`}>
+                {(() => {
+                  const currentPhase = getFilteredPhaseData()
+                  if (!currentPhase.areebaOummal) return '—'
+                  const validValues = currentPhase.areebaOummal.filter((v: number | null): v is number => v != null)
+                  if (!validValues.length) return '—'
+                  const sum = validValues.reduce((a:number,b:number)=>a+b,0)
+                  return sum.toLocaleString()
+                })()}
+              </div>
+              <div className="text-sm text-muted-foreground">Total Phase 3</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {seriesVisibility.areebaOummal ? 'Click to hide' : 'Click to show'}
+              </div>
+            </button>
             <button
               onClick={() => toggleSeries('exchangeRate')}
               className={`text-center p-4 rounded-lg transition-all duration-200 ${
@@ -1503,7 +1525,7 @@
                   return avgRate.toLocaleString() + ' LBP'
                 })()}
               </div>
-              <div className="text-sm text-muted-foreground">Average Currency Rate</div>
+              <div className="text-sm text-muted-foreground">Average Market Rate</div>
               <div className="text-xs text-muted-foreground mt-1">
                 {seriesVisibility.exchangeRate ? 'Click to hide' : 'Click to show'}
               </div>

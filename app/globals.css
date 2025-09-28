@@ -122,25 +122,4 @@
   body {
     @apply bg-background text-foreground;
   }
-  
-  /* RTL Support */
-  .rtl {
-    direction: rtl;
-  }
-  
-  .rtl .flex {
-    flex-direction: row-reverse;
-  }
-  
-  .rtl .grid {
-    direction: ltr; /* Keep grid layout LTR to maintain proper column order */
-  }
-  
-  .rtl .text-left {
-    text-align: right;
-  }
-  
-  .rtl .text-right {
-    text-align: left;
-  }
 }
