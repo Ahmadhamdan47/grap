@@ -167,6 +167,7 @@ export default function ArrivalsChart() {
   const chartInstance = useRef<echarts.ECharts | null>(null)
   const [selectedPhase, setSelectedPhase] = useState<keyof typeof phases>("all")
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isRTL, setIsRTL] = useState(false)
   // Selected data index (month) for showing detailed values
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [seriesVisibility, setSeriesVisibility] = useState({
@@ -267,11 +268,33 @@ export default function ArrivalsChart() {
     return filteredData
   }
 
+  // Transform data for RTL display (reverse arrays if RTL is enabled)
+  const getDisplayData = (phaseData: any) => {
+    if (!isRTL) {
+      return phaseData
+    }
+    
+    return {
+      ...phaseData,
+      months: [...phaseData.months].reverse(),
+      arrivals: [...phaseData.arrivals].reverse(),
+      estimatedArrivals: [...phaseData.estimatedArrivals].reverse(),
+      ulTests: [...phaseData.ulTests].reverse(),
+      exchangeRates: [...phaseData.exchangeRates].reverse(),
+      sayrafaRates: [...phaseData.sayrafaRates].reverse(),
+    }
+  }
+
   useEffect(() => {
     if (!chartRef.current) return
 
     // Initialize chart
     chartInstance.current = echarts.init(chartRef.current, isDarkMode ? "dark" : undefined)
+    
+    // Set RTL for chart content if needed
+    if (isRTL) {
+      chartInstance.current.getDom().style.direction = 'rtl'
+    }
 
     // Handle resize
     const handleResize = () => {
@@ -283,17 +306,18 @@ export default function ArrivalsChart() {
       window.removeEventListener("resize", handleResize)
       chartInstance.current?.dispose()
     }
-  }, [isDarkMode])
+  }, [isDarkMode, isRTL])
 
   useEffect(() => {
     if (!chartInstance.current) return
 
     const currentPhase = getFilteredPhaseData()
+    const displayData = getDisplayData(currentPhase)
 
     const option: echarts.EChartsOption = {
       title: {
-        text: `${currentPhase.name} - Arrivals Analysis & Exchange Rates`,
-        subtext: `${currentPhase.period} • Exchange Rate at bottom, Arrivals above with separate scales`,
+        text: `${currentPhase.name} - Arrivals Analysis & Market Rates`,
+        subtext: `${currentPhase.period} • Market Rate at bottom, Arrivals above with separate scales`,
         left: "center",
         textStyle: {
           fontSize: 20,
@@ -312,7 +336,7 @@ export default function ArrivalsChart() {
           let result = `<strong>${params[0].axisValue}</strong><br/>`
           params.forEach((param: any) => {
             if (param.value !== null && param.value !== undefined) {
-              if (param.seriesName === 'USD to LBP Rate') {
+              if (param.seriesName === 'Market Rate') {
                 const actualLBPRate = Math.abs(param.value);
                 result += `${param.marker} ${param.seriesName}: ${actualLBPRate.toLocaleString()} LBP<br/>`
               } else if (param.seriesName === 'Sayrafa Rate') {
@@ -331,21 +355,21 @@ export default function ArrivalsChart() {
       grid: [
         {
           id: 'arrivals',
-          left: "3%",
-          right: "4%", 
-          // Give a bit more room below arrivals chart so its (hidden) x-axis isn't flush with the exchange chart
-          bottom: "60%",
+          left: isRTL ? "4%" : "10%",
+          right: isRTL ? "10%" : "4%", 
+          // Minimize space below arrivals chart
+          bottom: "55%",
           top: 80,
-          containLabel: true,
+          containLabel: false,
         },
         {
           id: 'exchange',
-          left: "3%",
-          right: "4%",
+          left: isRTL ? "4%" : "10%",
+          right: isRTL ? "10%" : "4%",
           bottom: "15%",
-          // Add some vertical separation space above the exchange rate grid
-          top: "60%",
-          containLabel: true,
+          // Minimize vertical separation space above the exchange rate grid
+          top: "55%",
+          containLabel: false,
         }
       ],
       // Global axisPointer so a vertical dotted guide spans both grids (linked on x)
@@ -356,9 +380,9 @@ export default function ArrivalsChart() {
         show: true,
         triggerOn: 'mousemove|click',
         lineStyle: {
-          type: 'dotted',
-          width: 1.5,
-          color: isDarkMode ? '#888' : '#555'
+          type: 'solid',
+          width: 2,
+          color: isDarkMode ? '#fbbf24' : '#10b981' // Yellow in dark mode, green in light mode
         }
       },
       toolbox: {
@@ -383,7 +407,7 @@ export default function ArrivalsChart() {
           gridIndex: 0,
           type: "category",
           boundaryGap: false,
-          data: currentPhase.months,
+          data: displayData.months,
           axisLabel: {
             show: false,
           },
@@ -399,7 +423,7 @@ export default function ArrivalsChart() {
           gridIndex: 1,
           type: "category",
           boundaryGap: false,
-          data: currentPhase.months,
+          data: displayData.months,
           offset: 10,
           axisLabel: {
             rotate: 45,
@@ -416,14 +440,16 @@ export default function ArrivalsChart() {
           gridIndex: 0,
           type: "value",
           name: "Arrivals",
-          position: "left",
+          position: isRTL ? "right" : "left",
           min: 0,
           max: 400000,
           interval: 50000,
           axisLabel: {
+            margin: 8,
             formatter: (value: number) => {
               if (value === 0) return "0";
               if (value >= 1000000) return (value / 1000000).toFixed(1) + "M";
+              if (value >= 100000) return value.toLocaleString(); // Show full number for values like 300,000
               return (value / 1000).toFixed(0) + "k";
             },
           },
@@ -439,13 +465,14 @@ export default function ArrivalsChart() {
           id: 'exchange-y',
           gridIndex: 1, 
           type: "value",
-          name: "USD to LBP Rate",
-          position: "left",
+          name: "Market Rate",
+          position: isRTL ? "right" : "left",
           boundaryGap: [1.20, 1.20],
           min: 1515,
           max: 30000,
           interval: 3500,
           axisLabel: {
+            margin: 8,
             formatter: (value: number) => {
               if (value >= 1000) {
                 return (value / 1000).toFixed(0) + "k";
@@ -500,8 +527,8 @@ export default function ArrivalsChart() {
           type: "line" as const,
           xAxisIndex: 0,
           yAxisIndex: 0,
-          data: currentPhase.arrivals.map((manifest, index) => {
-            const estimated = currentPhase.estimatedArrivals[index]
+          data: displayData.arrivals.map((manifest: number | null, index: number) => {
+            const estimated = displayData.estimatedArrivals[index]
             return manifest !== null && estimated !== null ? Math.min(manifest, estimated) : null
           }),
           stack: 'decal1',
@@ -523,8 +550,8 @@ export default function ArrivalsChart() {
           type: "line" as const,
           xAxisIndex: 0,
           yAxisIndex: 0,
-          data: currentPhase.arrivals.map((manifest, index) => {
-            const estimated = currentPhase.estimatedArrivals[index]
+          data: displayData.arrivals.map((manifest: number | null, index: number) => {
+            const estimated = displayData.estimatedArrivals[index]
             if (manifest !== null && estimated !== null) {
               return Math.abs(manifest - estimated)
             }
@@ -550,8 +577,8 @@ export default function ArrivalsChart() {
           type: "line" as const,
           xAxisIndex: 0,
           yAxisIndex: 0,
-          data: currentPhase.estimatedArrivals.map((estimated, index) => {
-            const ul = currentPhase.ulTests[index]
+          data: displayData.estimatedArrivals.map((estimated: number | null, index: number) => {
+            const ul = displayData.ulTests[index]
             return estimated !== null && ul !== null ? Math.min(estimated, ul) : null
           }),
           stack: 'decal2',
@@ -573,8 +600,8 @@ export default function ArrivalsChart() {
           type: "line" as const,
           xAxisIndex: 0,
           yAxisIndex: 0,
-          data: currentPhase.estimatedArrivals.map((estimated, index) => {
-            const ul = currentPhase.ulTests[index]
+          data: displayData.estimatedArrivals.map((estimated: number | null, index: number) => {
+            const ul = displayData.ulTests[index]
             if (estimated !== null && ul !== null) {
               return Math.abs(estimated - ul)
             }
@@ -600,7 +627,7 @@ export default function ArrivalsChart() {
           type: "line" as const,
           xAxisIndex: 0,
           yAxisIndex: 0,
-          data: currentPhase.ulTests,
+          data: displayData.ulTests,
           areaStyle: {
             opacity: 0.2,
             color: {
@@ -620,8 +647,8 @@ export default function ArrivalsChart() {
           type: "line" as const,
           xAxisIndex: 1,
           yAxisIndex: 1,
-          data: currentPhase.exchangeRates.map((exchange, index) => {
-            const sayrafa = currentPhase.sayrafaRates[index]
+          data: displayData.exchangeRates.map((exchange: number | null, index: number) => {
+            const sayrafa = displayData.sayrafaRates[index]
             if (exchange !== null && sayrafa !== null) {
               return Math.min(Math.abs(exchange), sayrafa)
             }
@@ -646,8 +673,8 @@ export default function ArrivalsChart() {
           type: "line" as const,
           xAxisIndex: 1,
           yAxisIndex: 1,
-          data: currentPhase.exchangeRates.map((exchange, index) => {
-            const sayrafa = currentPhase.sayrafaRates[index]
+          data: displayData.exchangeRates.map((exchange: number | null, index: number) => {
+            const sayrafa = displayData.sayrafaRates[index]
             if (exchange !== null && sayrafa !== null) {
               return Math.abs(Math.abs(exchange) - sayrafa)
             }
@@ -673,7 +700,7 @@ export default function ArrivalsChart() {
           type: "line",
           xAxisIndex: 0,
           yAxisIndex: 0,
-          data: seriesVisibility.manifest ? currentPhase.arrivals : [],
+          data: seriesVisibility.manifest ? displayData.arrivals : [],
           smooth: true,
           connectNulls: false,
           lineStyle: {
@@ -695,7 +722,7 @@ export default function ArrivalsChart() {
           type: "line",
           xAxisIndex: 0,
           yAxisIndex: 0,
-          data: seriesVisibility.estimated ? currentPhase.estimatedArrivals : [],
+          data: seriesVisibility.estimated ? displayData.estimatedArrivals : [],
           smooth: true,
           connectNulls: false,
           lineStyle: {
@@ -717,7 +744,7 @@ export default function ArrivalsChart() {
           type: "line",
           xAxisIndex: 0,
           yAxisIndex: 0,
-          data: seriesVisibility.ul ? currentPhase.ulTests : [],
+          data: seriesVisibility.ul ? displayData.ulTests : [],
           smooth: true,
           connectNulls: false,
           lineStyle: {
@@ -735,11 +762,11 @@ export default function ArrivalsChart() {
           },
         },
         {
-          name: "USD to LBP Rate",
+          name: "Market Rate",
           type: "line",
           xAxisIndex: 1,
           yAxisIndex: 1,
-          data: seriesVisibility.exchangeRate ? currentPhase.exchangeRates.map(rate => rate !== null ? Math.abs(rate) : null) : [],
+          data: seriesVisibility.exchangeRate ? displayData.exchangeRates.map((rate: number | null) => rate !== null ? Math.abs(rate) : null) : [],
           smooth: false,
           connectNulls: false,
           lineStyle: {
@@ -781,7 +808,7 @@ export default function ArrivalsChart() {
           type: "line",
           xAxisIndex: 1,
           yAxisIndex: 1,
-          data: seriesVisibility.sayrafaRate ? currentPhase.sayrafaRates : [],
+          data: seriesVisibility.sayrafaRate ? displayData.sayrafaRates : [],
           smooth: false,
           connectNulls: false,
           lineStyle: {
@@ -813,12 +840,12 @@ export default function ArrivalsChart() {
             symbol: 'none',
             animation: false,
             lineStyle: {
-              color: isDarkMode ? '#bbbbbb' : '#333333',
-              width: 1.5,
-              type: 'dotted' as const
+              color: isDarkMode ? '#fbbf24' : '#10b981', // Yellow in dark mode, green in light mode
+              width: 2,
+              type: 'solid' as const
             },
             label: { show: false },
-            data: [ { xAxis: currentPhase.months[selectedIndex] } ]
+            data: [ { xAxis: displayData.months[selectedIndex] } ]
           }
         }, {
           name: 'Selected Month (Exchange)',
@@ -833,12 +860,12 @@ export default function ArrivalsChart() {
               symbol: 'none',
               animation: false,
               lineStyle: {
-                color: isDarkMode ? '#bbbbbb' : '#333333',
-                width: 1.5,
-                type: 'dotted' as const
+                color: isDarkMode ? '#fbbf24' : '#10b981', // Yellow in dark mode, green in light mode
+                width: 2,
+                type: 'solid' as const
               },
               label: { show: false },
-              data: [ { xAxis: currentPhase.months[selectedIndex] } ]
+              data: [ { xAxis: displayData.months[selectedIndex] } ]
             }
         }] : []),
       ],
@@ -850,9 +877,9 @@ export default function ArrivalsChart() {
     console.log("📊 Updating chart for phase:", selectedPhase)
     console.log("📊 Chart instance exists:", !!chartInstance.current)
     console.log("📊 Current phase data:", {
-      arrivals: currentPhase.arrivals?.slice(0, 3),
-      estimated: currentPhase.estimatedArrivals?.slice(0, 3), 
-      ulTests: currentPhase.ulTests?.slice(0, 3)
+      arrivals: displayData.arrivals?.slice(0, 3),
+      estimated: displayData.estimatedArrivals?.slice(0, 3), 
+      ulTests: displayData.ulTests?.slice(0, 3)
     })
 
     chartInstance.current.setOption(option, true)
@@ -891,10 +918,10 @@ export default function ArrivalsChart() {
         dataIndex: selectedIndex
       })
     }
-  }, [selectedPhase, isDarkMode, seriesVisibility, phaseVisibility, decalPatterns, selectedIndex])
+  }, [selectedPhase, isDarkMode, isRTL, seriesVisibility, phaseVisibility, decalPatterns, selectedIndex])
 
   return (
-    <Card className="w-full">
+    <Card className={`w-full ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <CardHeader>
         <div className="flex flex-col gap-4">
           <CardTitle className="text-2xl text-center">Interactive Arrivals Chart & USD to LBP Exchange Rates</CardTitle>
@@ -929,7 +956,7 @@ export default function ArrivalsChart() {
           </div>
 
           {/* Decal Patterns Toggle */}
-          <div className="flex justify-center">
+          <div className="flex justify-center gap-4">
             <button
               onClick={() => {
                 const allEnabled = decalPatterns.betweenManifestEstimated && decalPatterns.betweenEstimatedUL && decalPatterns.betweenULAxis && decalPatterns.betweenExchangeSayrafa
@@ -951,10 +978,22 @@ export default function ArrivalsChart() {
                 : '○ Difference Patterns'
               }
             </button>
+            
+            {/* RTL Toggle */}
+            <button
+              onClick={() => setIsRTL(!isRTL)}
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                isRTL
+                  ? 'bg-orange-600 text-white hover:bg-orange-700'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {isRTL ? '✓ RTL Layout' : '○ RTL Layout'}
+            </button>
           </div>
 
           <p className="text-sm text-muted-foreground text-center">
-            Exchange rate displayed at bottom (1515-30000 LBP), arrivals data above with separate scales. 
+            Market rate displayed at bottom (1515-30000 LBP), arrivals data above with separate scales. 
             Both charts are synchronized and can be zoomed independently. Click the cards below to toggle data series visibility.
           </p>
         </div>
@@ -965,16 +1004,17 @@ export default function ArrivalsChart() {
         <div className="mt-4 p-4 rounded-lg border bg-muted/30 text-sm">
           {(() => {
             const currentPhase = getFilteredPhaseData()
-            if (selectedIndex === null || !currentPhase.months[selectedIndex]) {
+            const displayData = getDisplayData(currentPhase)
+            if (selectedIndex === null || !displayData.months[selectedIndex]) {
               return <span className="text-muted-foreground">Click a point to lock the vertical line and see that month's values.</span>
             }
-            const monthLabel = currentPhase.months[selectedIndex]
-            const manifestVal = currentPhase.arrivals[selectedIndex]
-            const estimatedVal = currentPhase.estimatedArrivals[selectedIndex]
-            const ulVal = currentPhase.ulTests[selectedIndex]
-            const exValRaw = currentPhase.exchangeRates[selectedIndex]
+            const monthLabel = displayData.months[selectedIndex]
+            const manifestVal = displayData.arrivals[selectedIndex]
+            const estimatedVal = displayData.estimatedArrivals[selectedIndex]
+            const ulVal = displayData.ulTests[selectedIndex]
+            const exValRaw = displayData.exchangeRates[selectedIndex]
             const exVal = exValRaw != null ? Math.abs(exValRaw) : null
-            const sayrafaVal = currentPhase.sayrafaRates[selectedIndex]
+            const sayrafaVal = displayData.sayrafaRates[selectedIndex]
             return (
               <div className="flex flex-wrap gap-4 items-center">
                 <div className="font-medium">{monthLabel}</div>
@@ -1077,11 +1117,12 @@ export default function ArrivalsChart() {
                 const currentPhase = getFilteredPhaseData()
                 const validValues = currentPhase.exchangeRates.filter((v): v is number => v !== null);
                 if (validValues.length === 0) return 'N/A'
-                const maxRate = Math.max(...(validValues.map(v => Math.abs(v)) as number[]))
-                return maxRate.toLocaleString() + ' LBP'
+                const sum = validValues.reduce((acc, v) => acc + Math.abs(v), 0)
+                const avgRate = Math.round(sum / validValues.length)
+                return avgRate.toLocaleString() + ' LBP'
               })()}
             </div>
-            <div className="text-sm text-muted-foreground">Peak Exchange Rate</div>
+            <div className="text-sm text-muted-foreground">Average Exchange Rate</div>
             <div className="text-xs text-muted-foreground mt-1">
               {seriesVisibility.exchangeRate ? 'Click to hide' : 'Click to show'}
             </div>
@@ -1101,11 +1142,12 @@ export default function ArrivalsChart() {
                 const currentPhase = getFilteredPhaseData()
                 const validValues = currentPhase.sayrafaRates.filter((v): v is number => v !== null);
                 if (validValues.length === 0) return 'N/A'
-                const maxRate = Math.max(...(validValues as number[]))
-                return maxRate.toLocaleString() + ' LBP'
+                const sum = validValues.reduce((acc, v) => acc + v, 0)
+                const avgRate = Math.round(sum / validValues.length)
+                return avgRate.toLocaleString() + ' LBP'
               })()}
             </div>
-            <div className="text-sm text-muted-foreground">Peak Sayrafa Rate</div>
+            <div className="text-sm text-muted-foreground">Average Sayrafa Rate</div>
             <div className="text-xs text-muted-foreground mt-1">
               {seriesVisibility.sayrafaRate ? 'Click to hide' : 'Click to show'}
             </div>
