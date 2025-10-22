@@ -45,7 +45,7 @@
     return {
       all: [
         // Phase 1 (pre-Sayrafa period - using official rate of 1515)
-        1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515,
+        1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515,
         // Phase 2 (Jul 2021 - Jan 2022) - Sayrafa monthly averages (recomputed rounded)
         15250,  // Jul-21 avg
         16628,  // Aug-21 avg
@@ -62,7 +62,7 @@
         24781,  // Jun-22 avg
         25480,  // Jul-22 avg
       ],
-      phase1: [1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515],
+      phase1: [1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515, 1515],
       phase2: [15250, 16628, 14740, 16479, 18705, 21495, 23381],
       phase3: [20539, 21041, 22429, 23453, 24781, 25480],  // Feb-22 through Jul-22
     }
@@ -73,8 +73,8 @@
   // USD to LBP exchange rate data (monthly averages from CSV) - Phase 3 extended through Jul 2022
   const exchangeRateData = {
     all: [
-      // Phase 1 rates (Jul 2020 - Jun 2021)
-      -8081, -7433, -7686, -7803, -7820, -8286,   // Jul-Dec 2020
+      // Phase 1 rates (Aug 2020 - Jun 2021)
+      -7433, -7686, -7803, -7820, -8286,   // Aug-Dec 2020
       -8762, -9138, -11708, -12201, -12713, -15274, // Jan-Jun 2021
       // Phase 2 rates (Jul 2021 - Jan 2022)
       -19408, -19587, -16479, -19691, -22900, -25911, -26493, // Jul 2021 - Jan 2022
@@ -86,47 +86,44 @@
       -28607, // Jun-22
       -29546, // Jul-22
     ],
-    phase1: [-8081, -7433, -7686, -7803, -7820, -8286, -8762, -9138, -11708, -12201, -12713, -15274],
+    phase1: [-7433, -7686, -7803, -7820, -8286, -8762, -9138, -11708, -12201, -12713, -15274],
     phase2: [-19408, -19587, -16479, -19691, -22900, -25911, -26493],
     phase3: [-20926, -22945, -25760, -29595, -28607, -29546], // Feb-22 through Jul-22
   }
 
-  // Lollar rate data (3900 LBP from Jul 2020 to Jul 2021, then null)
+  // Lollar rate data (3900 LBP from Aug 2020 to Jul 2021, then null)
   const lollarRateData = {
     all: [
-      // Phase 1 - Lollar rate 3900 LBP (Jul 2020 - Jun 2021)
-      3900, 3900, 3900, 3900, 3900, 3900,   // Jul-Dec 2020
+      // Phase 1 - Lollar rate 3900 LBP (Aug 2020 - Jun 2021)
+      3900, 3900, 3900, 3900, 3900,   // Aug-Dec 2020
       3900, 3900, 3900, 3900, 3900, 1515,   // Jan-Jun 2021
       // Phase 2 and beyond - Lollar not active
       null, null, null, null, null, null, null, // Jul 2021 - Jan 2022
       null, null, null, null, null, null, // Feb-Jul 2022
     ],
-    phase1: [3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900],
+    phase1: [3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900, 3900],
     phase2: [null, null, null, null, null, null, null],
     phase3: [null, null, null, null, null, null], // Feb-22 through Jul-22
   }
 
-  // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Jul-22) with a leading Jul-20 null for alignment (extended to include full data)
+  // Full hardcoded dataset extracted from numbers.csv (Aug-20 .. Jul-22) starting from August 2020
   const fullMonths = [
-    'Jul-20','Aug-20','Sep-20','Oct-20','Nov-20','Dec-20',
+    'Aug-20','Sep-20','Oct-20','Nov-20','Dec-20',
     'Jan-21','Feb-21','Mar-21','Apr-21','May-21','Jun-21',
     'Jul-21','Aug-21','Sep-21','Oct-21','Nov-21','Dec-21','Jan-22','Feb-22',
     'Mar-22','Apr-22','May-22','Jun-22','Jul-22'
   ]
   const manifestAll: (number|null)[] = [
-    null,
     74366,81928,109267,99776,155020,67076,67395,101113,107240,153360,234519,
     355979,208033,183225,192837,156665,242955,153230,159970,
     201536,411037,380559,340317,460018
   ]
   const estimatedAll: (number|null)[] = [
-    null,
     69604,76772,102471,93489,145479,62851,63151,94796,100556,143858,219848,
     333620,195051,171831,180867,146765,227978,143836,150172,
     null,null,null,null,null
   ]
   const ulAll: (number|null)[] = [
-    null, // Jul-20
     null,null,null,null,null, // Aug20-Dec20
     null,null,null,null,null,null, // Jan21-Jun21
     255958,149581,131744,138655,112646,174691,36725, // Jul21-Jan22
@@ -134,7 +131,6 @@
     null,null,null,null,null // Mar22-Jul22
   ]
   const areebaOummalAll: (number|null)[] = [
-    null, // Jul-20
     null,null,null,null,null, // Aug20-Dec20
     null,null,null,null,null,null, // Jan21-Jun21
     null,null,null,null,null,null, // Jul21-Dec21
@@ -147,7 +143,7 @@
   const phases = {
     all: {
       name: "All Phases",
-      period: "01-07-2020 to 31-07-2022",
+      period: "01-08-2020 to 31-07-2022",
       months: fullMonths,
       arrivals: manifestAll,
       estimatedArrivals: estimatedAll,
@@ -159,15 +155,15 @@
     },
     phase1: {
       name: "Phase 1",
-      period: "01-07-2020 to 30-06-2021",
+      period: "01-08-2020 to 30-06-2021",
       months: [
-        "Jul-20", "Aug-20", "Sep-20", "Oct-20", "Nov-20", "Dec-20",
+        "Aug-20", "Sep-20", "Oct-20", "Nov-20", "Dec-20",
         "Jan-21", "Feb-21", "Mar-21", "Apr-21", "May-21", "Jun-21",
       ],
-    arrivals: manifestAll.slice(0,12),
-    estimatedArrivals: estimatedAll.slice(0,12),
-    ulTests: ulAll.slice(0,12),
-    areebaOummal: areebaOummalAll.slice(0,12),
+    arrivals: manifestAll.slice(0,11),
+    estimatedArrivals: estimatedAll.slice(0,11),
+    ulTests: ulAll.slice(0,11),
+    areebaOummal: areebaOummalAll.slice(0,11),
       exchangeRates: exchangeRateData.phase1,
       sayrafaRates: sayrafaRateData.phase1,
       lollarRates: lollarRateData.phase1,
@@ -175,11 +171,11 @@
     phase2: {
       name: "Phase 2",
       period: "01-07-2021 to 09-01-2022 (UL ends Jan 9)",
-      months: fullMonths.slice(12,19), // Jul-21 .. Jan-22 (Phase 2 ends Jan 9, includes partial Jan)
-      arrivals: manifestAll.slice(12,19),
-      estimatedArrivals: estimatedAll.slice(12,19),
-      ulTests: ulAll.slice(12,19),
-      areebaOummal: areebaOummalAll.slice(12,19),
+      months: fullMonths.slice(11,18), // Jul-21 .. Jan-22 (Phase 2 ends Jan 9, includes partial Jan)
+      arrivals: manifestAll.slice(11,18),
+      estimatedArrivals: estimatedAll.slice(11,18),
+      ulTests: ulAll.slice(11,18),
+      areebaOummal: areebaOummalAll.slice(11,18),
       exchangeRates: exchangeRateData.phase2, // Jul-21 .. Jan-22
       sayrafaRates: sayrafaRateData.phase2,    // Jul-21 .. Jan-22
       lollarRates: lollarRateData.phase2,
@@ -187,11 +183,11 @@
     phase3: {
       name: "Phase 3",
       period: "10-01-2022 to 28-02-2022 (Areeba+Oummal starts Jan 10)",
-      months: fullMonths.slice(18, 20), // Jan-22 and Feb-22 only (Phase 3 original scope)
-      arrivals: manifestAll.slice(18, 20),
-      estimatedArrivals: estimatedAll.slice(18, 20), 
-      ulTests: ulAll.slice(18, 20),
-      areebaOummal: areebaOummalAll.slice(18, 20),
+      months: fullMonths.slice(17, 19), // Jan-22 and Feb-22 only (Phase 3 original scope)
+      arrivals: manifestAll.slice(17, 19),
+      estimatedArrivals: estimatedAll.slice(17, 19), 
+      ulTests: ulAll.slice(17, 19),
+      areebaOummal: areebaOummalAll.slice(17, 19),
       exchangeRates: exchangeRateData.phase2.slice(6).concat(exchangeRateData.phase3.slice(0, 1)), // Jan-22 and Feb-22 only
       sayrafaRates: sayrafaRateData.phase2.slice(6).concat(sayrafaRateData.phase3.slice(0, 1)), // Jan-22 and Feb-22 only
       lollarRates: lollarRateData.phase2.slice(6).concat(lollarRateData.phase3.slice(0, 1)),
@@ -294,39 +290,39 @@
       const filteredData = {
         ...allPhase,
         arrivals: allPhase.arrivals.map((value, index) => {
-          if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index < 11 && !phaseVisibility.phase1) return null
+          if (index >= 11 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         estimatedArrivals: allPhase.estimatedArrivals.map((value, index) => {
-          if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index < 11 && !phaseVisibility.phase1) return null
+          if (index >= 11 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         ulTests: allPhase.ulTests.map((value, index) => {
-          if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index < 11 && !phaseVisibility.phase1) return null
+          if (index >= 11 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         exchangeRates: allPhase.exchangeRates.map((value, index) => {
-          if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index < 11 && !phaseVisibility.phase1) return null
+          if (index >= 11 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         sayrafaRates: allPhase.sayrafaRates.map((value, index) => {
-          if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index < 11 && !phaseVisibility.phase1) return null
+          if (index >= 11 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
         areebaOummal: allPhase.areebaOummal.map((value, index) => {
-          if (index < 12 && !phaseVisibility.phase1) return null
-          if (index >= 12 && index < 19 && !phaseVisibility.phase2) return null
-          if (index >= 19 && !phaseVisibility.phase3) return null
+          if (index < 11 && !phaseVisibility.phase1) return null
+          if (index >= 11 && index < 18 && !phaseVisibility.phase2) return null
+          if (index >= 18 && !phaseVisibility.phase3) return null
           return value
         }),
       }
@@ -387,7 +383,7 @@
       // Midpoint separator between Jan-22 and Feb-22
       const janBoundary = janIndex !== -1
         ? janIndex + 0.5
-        : 18.5
+        : 17.5
       // Position (slightly offset) for vertical separator showing UL -> Areeba+Oummal transition
       const ulAreebaTransitionPosition = (() => {
         if (janIndex === -1) return null
@@ -564,12 +560,6 @@
           feature: {
             saveAsImage: {
               title: "Save as Image",
-            },
-            dataZoom: {
-              title: {
-                zoom: "Zoom",
-                back: "Reset Zoom",
-              },
             },
             restore: {
               title: "Restore",
@@ -1163,7 +1153,7 @@
                   fontSize: 10,
                   fontWeight: 'normal'
                 },
-                data: [ { xAxis: 11.5 } ] // Between Jun-21 (index 11) and Jul-21 (index 12)
+                data: [ { xAxis: 10.5 } ] // Between Jun-21 (index 10) and Jul-21 (index 11)
               }
             },
             {
@@ -1189,7 +1179,7 @@
                   opacity: 0.7
                 },
                 label: { show: false },
-                data: [ { xAxis: 11.5 } ]
+                data: [ { xAxis: 10.5 } ]
               }
             },
             // (Removed Phase 2-3 separator as requested)
@@ -1255,6 +1245,67 @@
                   fontWeight: 'bold'
                 },
                 data: [ { xAxis: ulAreebaTransitionPosition } ]
+              }
+            }
+          ] : []),
+          // End of 3rd phase separator (green line after Feb-22)
+          ...(selectedPhase === 'all' ? [
+            {
+              name: 'End of 3rd Phase (Arrivals)',
+              type: 'line' as const,
+              xAxisIndex: 0,
+              yAxisIndex: 0,
+              data: [],
+              silent: true,
+              showSymbol: false,
+              lineStyle: { opacity: 0 },
+              markLine: {
+                symbol: 'none',
+                animation: false,
+                lineStyle: {
+                  color: '#22c55e',
+                  width: 2,
+                  type: 'solid' as const,
+                  opacity: 0.9
+                },
+                label: {
+                  show: true,
+                  position: 'insideEndTop',
+                  formatter: '3rd phase ends',
+                  color: '#22c55e',
+                  fontSize: 8,
+                  fontWeight: 'bold'
+                },
+                data: [ { xAxis: 18.0 } ] // At Mar-22 start (end of Feb-22/Phase 3)
+              }
+            },
+            {
+              name: 'End of 3rd Phase (Exchange)',
+              type: 'line' as const,
+              xAxisIndex: 1,
+              yAxisIndex: 1,
+              data: [],
+              silent: true,
+              showSymbol: false,
+              lineStyle: { opacity: 0 },
+              markLine: {
+                symbol: 'none',
+                animation: false,
+                lineStyle: {
+                  color: '#22c55e',
+                  width: 2,
+                  type: 'solid' as const,
+                  opacity: 0.9
+                },
+                label: {
+                  show: true,
+                  position: 'insideEndBottom',
+                  formatter: '3rd phase ends',
+                  color: '#22c55e',
+                  fontSize: 10,
+                  fontWeight: 'bold'
+                },
+                data: [ { xAxis: 18.0 } ] // At Mar-22 start (end of Feb-22/Phase 3)
               }
             }
           ] : []),
@@ -1385,7 +1436,7 @@
                 Evaluations
               </a>
             </div>
-            <CardTitle className="text-2xl text-center">Interactive Arrivals Chart & USD to LBP Exchange Rates</CardTitle>
+            <CardTitle className="text-2xl text-center">Complacency Analysis: Multi-Phase Data Correlation Dashboard</CardTitle>
             
             {/* Phase Toggle Buttons */}
             <div className="flex flex-wrap justify-center gap-2">
@@ -1426,14 +1477,15 @@
                 onClick={() => toggleDifference('estimatedUL')}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.estimatedUL ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'}`}
               >UL vs Estimated</button>
+                          <button
+                onClick={() => toggleDifference('areebaManifest')}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}
+              >Estimated vs 3rd phase</button>
               <button
                 onClick={() => toggleDifference('marketSayrafa')}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.marketSayrafa ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}`}
               >Market vs Sayrafa</button>
-              <button
-                onClick={() => toggleDifference('areebaManifest')}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}
-              >Estimated vs 3rd phase</button>
+  
             </div>
 
             {/* Area Fill Toggles */}
@@ -1451,10 +1503,7 @@
 
 
 
-            <p className="text-sm text-muted-foreground text-center">
-              Currency rate displayed at bottom (1515-30000 LBP), arrivals data above with separate scales. 
-              Both charts are synchronized and can be zoomed independently. Click the cards below to toggle data series visibility.
-            </p>
+           
           </div>
         </CardHeader>
         <CardContent>
@@ -1491,7 +1540,7 @@
               )
             })()}
           </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <button
               onClick={() => toggleSeries('manifest')}
               className={`text-center p-4 rounded-lg transition-all duration-200 ${
@@ -1664,6 +1713,7 @@
                 {seriesVisibility.exchangeRate ? 'Click to hide' : 'Click to show'}
               </div>
             </button>
+
           </div>
           
           {/* Stacked Bar Charts for Airline Distribution */}
