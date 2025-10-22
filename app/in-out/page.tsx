@@ -49,8 +49,9 @@ export default function InOutPage() {
         {
           orient: 'vertical',
           left: 'left',
-          top: 'middle',
+          top: 'bottom',
           data: payerData.map(item => item.name),
+   
           textStyle: {
             fontSize: 12
           },
@@ -62,7 +63,7 @@ export default function InOutPage() {
         {
           orient: 'vertical',
           right: 'right',
-          top: 'middle',
+          top: 'bottom',
           data: expenseData.map(item => item.name),
           textStyle: {
             fontSize: 12
@@ -77,18 +78,19 @@ export default function InOutPage() {
         {
           type: 'text',
           left: '5%',
-          top: '30%',
+          top: '80%',
           style: {
             text: 'IN',
             fontSize: 18,
             fontWeight: 'bold',
-            fill: '#333'
+            fill: '#333',
+          
           }
         },
         {
           type: 'text',
           right: '5%',
-          top: '30%',
+          top: '80%',
           style: {
             text: 'OUT',
             fontSize: 18,
@@ -170,7 +172,7 @@ export default function InOutPage() {
         <Card className="w-full">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-3xl">Financial Flow Analysis</CardTitle>
+              <CardTitle className="text-3xl">Financial Flow</CardTitle>
               <a 
                 href="/"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -270,7 +272,7 @@ export default function InOutPage() {
         {/* Analytical Comparison Section */}
         <Card className="w-full mt-8">
           <CardHeader>
-            <CardTitle className="text-2xl">Analytical Comparison</CardTitle>
+            <CardTitle className="text-2xl">Performance Evaluation</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">

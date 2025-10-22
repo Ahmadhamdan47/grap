@@ -213,6 +213,7 @@
       exchangeRate: true,
       sayrafaRate: true,
       lollarRate: true,
+      official1515: true,
     })
     // Area fill (background color under line) visibility per series
     const [fillVisibility, setFillVisibility] = useState({
@@ -739,11 +740,11 @@
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
-                  // Unified difference overlay color
-                  areaStyle: { color: 'rgba(204,255,0,0.45)', opacity: 0.55 },
+                  // More potent difference overlay color
+                  areaStyle: { color: 'rgba(204,255,0,0.7)', opacity: 0.7 },
                 emphasis: { disabled: true },
                 tooltip: { show: false },
-                z: -1
+                z: 1
               }) as any
             ]
           })() : []),
@@ -843,10 +844,10 @@
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
-                areaStyle: { color: 'rgba(204,255,0,0.45)', opacity: 0.55 },
+                areaStyle: { color: 'rgba(204,255,0,0.7)', opacity: 0.7 },
                 emphasis: { disabled: true },
                 tooltip: { show: false },
-                z: -1
+                z: 1
               }) as any
             ]
           })() : []),
@@ -885,11 +886,11 @@
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
-                // Unified difference overlay color
-                areaStyle: { color: 'rgba(204,255,0,0.45)', opacity: 0.55 },
+                // More potent difference overlay color
+                areaStyle: { color: 'rgba(204,255,0,0.7)', opacity: 0.7 },
                 emphasis: { disabled: true },
                 tooltip: { show: false },
-                z: -1
+                z: 1
               }) as any
             ]
           })() : []),
@@ -929,11 +930,11 @@
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
-                // Unified difference overlay color
-                areaStyle: { color: 'rgba(204,255,0,0.45)', opacity: 0.55 },
+                // More potent difference overlay color
+                areaStyle: { color: 'rgba(204,255,0,0.7)', opacity: 0.7 },
                 emphasis: { disabled: true },
                 tooltip: { show: false },
-                z: -1
+                z: 1
               }) as any
             ]
           })() : []),
@@ -974,7 +975,14 @@
             itemStyle: {
               color: "#3b82f6",
             },
-            areaStyle: undefined,
+            areaStyle: fillVisibility.ul ? {
+              // Stronger, more visible UL fill (blue gradient)
+              opacity: 0.28,
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(59,130,246,0.55)' },
+                { offset: 1, color: 'rgba(59,130,246,0.05)' }
+              ])
+            } : undefined,
             emphasis: {
               focus: "series",
             },
@@ -994,7 +1002,14 @@
             itemStyle: {
               color: "#7c3aed",
             },
-            areaStyle: undefined,
+            areaStyle: fillVisibility.areebaOummal ? {
+              // Stronger, more visible 3rd phase fill (purple gradient)
+              opacity: 0.28,
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(124,58,237,0.55)' },
+                { offset: 1, color: 'rgba(124,58,237,0.05)' }
+              ])
+            } : undefined,
             emphasis: {
               focus: "series",
             },
@@ -1037,30 +1052,34 @@
               color: "#ef4444",
             },
             areaStyle: fillVisibility.exchangeRate ? {
-              opacity: 0.3,
-              color: "#ef4444",
+              opacity: 0.38,
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(239,68,68,0.55)' },
+                { offset: 1, color: 'rgba(239,68,68,0.06)' }
+              ])
             } : undefined,
             emphasis: {
               focus: "series",
             },
-            markLine: {
-              silent: true,
-              symbol: 'none',
-              lineStyle: {
-                color: '#CCFF00',
-                width: 2,
-                type: 'solid'
-              },
-              data: [{
-                yAxis: 1515,
-                label: {
-                  show: true,
-                  position: 'insideEndTop',
-                  formatter: '1515 LBP', // baseline
-                  color: '#222',
-                  fontSize: 12
-                }
-              }]
+          },
+          {
+            name: "1515 LBP",
+            type: "line",
+            xAxisIndex: 1,
+            yAxisIndex: 1,
+            data: seriesVisibility.official1515 ? displayData.months.map(() => 1515) : [],
+            smooth: false,
+            connectNulls: false,
+            lineStyle: {
+              width: 2,
+              type: "dashed",
+              color: "#14b8a6"
+            },
+            itemStyle: {
+              color: "#14b8a6",
+            },
+            emphasis: {
+              focus: "series",
             },
           },
           {
@@ -1079,8 +1098,11 @@
               color: "#22c55e",
             },
             areaStyle: fillVisibility.sayrafaRate ? {
-              opacity: 0.2,
-              color: "#22c55e",
+              opacity: 0.28,
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(34,197,94,0.5)' },
+                { offset: 1, color: 'rgba(34,197,94,0.06)' }
+              ])
             } : undefined,
             emphasis: {
               focus: "series",
@@ -1102,8 +1124,11 @@
               color: "#f59e0b",
             },
             areaStyle: fillVisibility.lollarRate ? {
-              opacity: 0.2,
-              color: "#f59e0b",
+              opacity: 0.28,
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(245,158,11,0.5)' },
+                { offset: 1, color: 'rgba(245,158,11,0.06)' }
+              ])
             } : undefined,
             emphasis: {
               focus: "series",
@@ -1144,10 +1169,14 @@
             {
               name: 'Phase 1-2 Separator (Exchange)',
               type: 'line' as const,
-              xAxisIndex: 1,
-              yAxisIndex: 1,
-              data: [],
-              silent: true,
+                  areaStyle: fillVisibility.manifest ? {
+                    // Slightly stronger fill for better visibility
+                    opacity: 0.18,
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                      { offset: 0, color: 'rgba(107,114,128,0.35)' },
+                      { offset: 1, color: 'rgba(107,114,128,0.05)' }
+                    ])
+                  } : undefined,
               showSymbol: false,
               lineStyle: { opacity: 0 },
               markLine: {
@@ -1199,10 +1228,13 @@
             {
               name: 'UL→A+O Transition (Exchange)',
               type: 'line' as const,
-              xAxisIndex: 1,
-              yAxisIndex: 1,
-              data: [],
-              silent: true,
+                  areaStyle: fillVisibility.estimated ? {
+                    opacity: 0.2,
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                      { offset: 0, color: 'rgba(0,0,0,0.35)' },
+                      { offset: 1, color: 'rgba(0,0,0,0.05)' }
+                    ])
+                  } : undefined,
               showSymbol: false,
               lineStyle: { opacity: 0 },
               markLine: {
@@ -1350,7 +1382,7 @@
                 href="/in-out"
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
               >
-                IN-OUT
+                Evaluations
               </a>
             </div>
             <CardTitle className="text-2xl text-center">Interactive Arrivals Chart & USD to LBP Exchange Rates</CardTitle>
@@ -1558,6 +1590,62 @@
                 {seriesVisibility.areebaOummal ? 'Click to hide' : 'Click to show'}
               </div>
             </button>
+            
+            {/* Replace Market card with Sayrafa / 1515 / 3900 toggles */}
+            <button
+              onClick={() => toggleSeries('sayrafaRate')}
+              className={`text-center p-4 rounded-lg transition-all duration-200 ${
+                seriesVisibility.sayrafaRate
+                  ? 'bg-green-50 dark:bg-green-950/20 hover:bg-green-100 dark:hover:bg-green-950/30'
+                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+              }`}
+            >
+              <div className={`text-2xl font-bold ${
+                seriesVisibility.sayrafaRate ? 'text-green-600' : 'text-gray-400'
+              }`}>
+                Sayrafa
+              </div>
+              <div className="text-sm text-muted-foreground">Toggle Sayrafa Curve</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {seriesVisibility.sayrafaRate ? 'Click to hide' : 'Click to show'}
+              </div>
+            </button>
+            <button
+              onClick={() => toggleSeries('official1515')}
+              className={`text-center p-4 rounded-lg transition-all duration-200 ${
+                seriesVisibility.official1515
+                  ? 'bg-gray-50 dark:bg-gray-950/20 hover:bg-gray-100 dark:hover:bg-gray-950/30'
+                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+              }`}
+            >
+              <div className={`text-2xl font-bold ${
+                seriesVisibility.official1515 ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400'
+              }`}>
+                1515 LBP
+              </div>
+              <div className="text-sm text-muted-foreground">Toggle 1515 Baseline</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {seriesVisibility.official1515 ? 'Click to hide' : 'Click to show'}
+              </div>
+            </button>
+            <button
+              onClick={() => toggleSeries('lollarRate')}
+              className={`text-center p-4 rounded-lg transition-all duration-200 ${
+                seriesVisibility.lollarRate
+                  ? 'bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/30'
+                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
+              }`}
+            >
+              <div className={`text-2xl font-bold ${
+                seriesVisibility.lollarRate ? 'text-amber-600' : 'text-gray-400'
+              }`}>
+                3900 LBP
+              </div>
+              <div className="text-sm text-muted-foreground">Toggle 3900 Baseline</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {seriesVisibility.lollarRate ? 'Click to hide' : 'Click to show'}
+              </div>
+            </button>
             <button
               onClick={() => toggleSeries('exchangeRate')}
               className={`text-center p-4 rounded-lg transition-all duration-200 ${
@@ -1569,31 +1657,24 @@
               <div className={`text-2xl font-bold ${
                 seriesVisibility.exchangeRate ? 'text-red-600' : 'text-gray-400'
               }`}>
-                {(() => {
-                  const currentPhase = getFilteredPhaseData()
-                  const validValues = currentPhase.exchangeRates.filter((v): v is number => v !== null);
-                  if (validValues.length === 0) return 'N/A'
-                  const sum = validValues.reduce((acc, v) => acc + Math.abs(v), 0)
-                  const avgRate = Math.round(sum / validValues.length)
-                  return avgRate.toLocaleString() + ' LBP'
-                })()}
+                Market Rate
               </div>
-              <div className="text-sm text-muted-foreground">Average Market Rate</div>
+              <div className="text-sm text-muted-foreground">Toggle Market Rate Curve</div>
               <div className="text-xs text-muted-foreground mt-1">
                 {seriesVisibility.exchangeRate ? 'Click to hide' : 'Click to show'}
               </div>
             </button>
           </div>
           
-          {/* Polar Charts for Airline Distribution */}
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* 2021 Polar Chart */}
+          {/* Stacked Bar Charts for Airline Distribution */}
+          <div className="mt-8 grid grid-cols-1 gap-8">
+            {/* 2021 Stacked Bar Chart */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl text-center">2021 - Airlines Distribution</CardTitle>
+                <CardTitle className="text-xl text-center">Passengers distribution by airlines - 2021</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="w-full h-[500px]">
+                <div className="w-full h-[340px]">
                   <div ref={(ref) => {
                     if (ref && !ref.hasAttribute('data-initialized-2021')) {
                       const chart2021 = echarts.init(ref)
@@ -1613,51 +1694,58 @@
                         { name: 'Others', value: 21 }
                       ]
 
+                      const total2021 = data2021.reduce((s, d) => s + d.value, 0)
+                      const colors2021 = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
                       const option2021 = {
-                        angleAxis: {
-                          type: 'category',
-                          data: data2021.map(item => item.name),
-                          axisLabel: {
-                            fontSize: 12,
-                            rotate: 45
-                          }
-                        },
-                        radiusAxis: {
+                        grid: { left: '2%', right: '2%', bottom: '22%', top: '10%', containLabel: true },
+                        xAxis: {
+                          type: 'value',
                           min: 0,
-                          max: 40,
-                          axisLabel: {
-                            formatter: '{value}%',
-                            fontSize: 11
-                          }
+                          max: total2021,
+                          axisLabel: { formatter: '{value}%' }
                         },
-                        polar: {
-                          radius: [30, '85%']
+                        yAxis: {
+                          type: 'category',
+                          data: ['2021'],
+                          axisTick: { show: false },
+                          axisLine: { show: false },
+                          axisLabel: { show: false }
                         },
-                        series: [{
+                        series: data2021.map((item, idx) => ({
+                          name: item.name,
                           type: 'bar',
-                          data: data2021.map(item => item.value),
-                          coordinateSystem: 'polar',
-                          name: 'Distribution',
-                          itemStyle: {
-                            color: function(params: any) {
-                              const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
-                              return colors[params.dataIndex % colors.length]
+                          stack: 'total',
+                          barWidth: 56,
+                          emphasis: {
+                            focus: 'series',
+                            label: {
+                              show: true,
+                              position: 'inside',
+                              formatter: ({ seriesName, value }: any) => `${seriesName} ${value}%`,
+                              fontSize: 11,
+                              color: '#111',
+                              textBorderColor: '#fff',
+                              textBorderWidth: 2
                             }
                           },
-                          label: {
-                            show: true,
-                            position: 'middle',
-                            formatter: '{c}%',
-                            fontSize: 12,
-                            fontWeight: 'bold'
-                          }
-                        }],
+                          itemStyle: { color: colors2021[idx % colors2021.length] },
+                          label: { show: false },
+                          labelLayout: { hideOverlap: false },
+                          data: [item.value]
+                        })),
                         tooltip: {
                           trigger: 'item',
-                          formatter: '{b}: {c}%'
+                          formatter: ({ seriesName, value }: any) => `${seriesName}: ${value}%`
                         },
                         legend: {
-                          show: false
+                          show: true,
+                          type: 'scroll',
+                          bottom: 0,
+                          left: 0,
+                          orient: 'horizontal',
+                          itemWidth: 12,
+                          itemHeight: 12,
+                          textStyle: { fontSize: 11 }
                         }
                       }
 
@@ -1676,13 +1764,13 @@
               </CardContent>
             </Card>
 
-            {/* 2022 Polar Chart */}
+            {/* 2022 Stacked Bar Chart */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl text-center">2022 - Airlines Distribution</CardTitle>
+                <CardTitle className="text-xl text-center">Passengers distribution by airlines - 2022</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="w-full h-[500px]">
+                <div className="w-full h-[340px]">
                   <div ref={(ref) => {
                     if (ref && !ref.hasAttribute('data-initialized-2022')) {
                       const chart2022 = echarts.init(ref)
@@ -1702,51 +1790,58 @@
                         { name: 'Others', value: 22 }
                       ]
 
+                      const total2022 = data2022.reduce((s, d) => s + d.value, 0)
+                      const colors2022 = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
                       const option2022 = {
-                        angleAxis: {
-                          type: 'category',
-                          data: data2022.map(item => item.name),
-                          axisLabel: {
-                            fontSize: 12,
-                            rotate: 45
-                          }
-                        },
-                        radiusAxis: {
+                        grid: { left: '2%', right: '2%', bottom: '22%', top: '10%', containLabel: true },
+                        xAxis: {
+                          type: 'value',
                           min: 0,
-                          max: 40,
-                          axisLabel: {
-                            formatter: '{value}%',
-                            fontSize: 11
-                          }
+                          max: total2022,
+                          axisLabel: { formatter: '{value}%' }
                         },
-                        polar: {
-                          radius: [30, '85%']
+                        yAxis: {
+                          type: 'category',
+                          data: ['2022'],
+                          axisTick: { show: false },
+                          axisLine: { show: false },
+                          axisLabel: { show: false }
                         },
-                        series: [{
+                        series: data2022.map((item, idx) => ({
+                          name: item.name,
                           type: 'bar',
-                          data: data2022.map(item => item.value),
-                          coordinateSystem: 'polar',
-                          name: 'Distribution',
-                          itemStyle: {
-                            color: function(params: any) {
-                              const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
-                              return colors[params.dataIndex % colors.length]
+                          stack: 'total',
+                          barWidth: 56,
+                          emphasis: {
+                            focus: 'series',
+                            label: {
+                              show: true,
+                              position: 'inside',
+                              formatter: ({ seriesName, value }: any) => `${seriesName} ${value}%`,
+                              fontSize: 11,
+                              color: '#111',
+                              textBorderColor: '#fff',
+                              textBorderWidth: 2
                             }
                           },
-                          label: {
-                            show: true,
-                            position: 'middle',
-                            formatter: '{c}%',
-                            fontSize: 12,
-                            fontWeight: 'bold'
-                          }
-                        }],
+                          itemStyle: { color: colors2022[idx % colors2022.length] },
+                          label: { show: false },
+                          labelLayout: { hideOverlap: false },
+                          data: [item.value]
+                        })),
                         tooltip: {
                           trigger: 'item',
-                          formatter: '{b}: {c}%'
+                          formatter: ({ seriesName, value }: any) => `${seriesName}: ${value}%`
                         },
                         legend: {
-                          show: false
+                          show: true,
+                          type: 'scroll',
+                          bottom: 0,
+                          left: 0,
+                          orient: 'horizontal',
+                          itemWidth: 12,
+                          itemHeight: 12,
+                          textStyle: { fontSize: 11 }
                         }
                       }
 
