@@ -4,6 +4,9 @@
   import * as echarts from "echarts"
   import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+  import { Toggle } from "@/components/ui/toggle"
+  import { Button } from "@/components/ui/button"
+  import { Download } from "lucide-react"
 
   // Static seed data (legacy short window kept for phase2 reference)
   const chartData = {
@@ -91,12 +94,12 @@
     phase3: [-20926, -22945, -25760, -29595, -28607, -29546], // Feb-22 through Jul-22
   }
 
-  // Lollar rate data (3900 LBP from Aug 2020 to Jul 2021, then null)
+  // Lollar rate data (3900 LBP from Aug 2020 to Jun 2021, then null)
   const lollarRateData = {
     all: [
       // Phase 1 - Lollar rate 3900 LBP (Aug 2020 - Jun 2021)
       3900, 3900, 3900, 3900, 3900,   // Aug-Dec 2020
-      3900, 3900, 3900, 3900, 3900, 1515,   // Jan-Jun 2021
+      3900, 3900, 3900, 3900, 3900, 3900,   // Jan-Jun 2021
       // Phase 2 and beyond - Lollar not active
       null, null, null, null, null, null, null, // Jul 2021 - Jan 2022
       null, null, null, null, null, null, // Feb-Jul 2022
@@ -197,6 +200,10 @@
   export default function ArrivalsChart() {
     const chartRef = useRef<HTMLDivElement>(null)
     const chartInstance = useRef<echarts.ECharts | null>(null)
+    const chart2021Ref = useRef<HTMLDivElement>(null)
+    const chart2022Ref = useRef<HTMLDivElement>(null)
+    const chart2021Instance = useRef<echarts.ECharts | null>(null)
+    const chart2022Instance = useRef<echarts.ECharts | null>(null)
     const [selectedPhase, setSelectedPhase] = useState<keyof typeof phases>("all")
     const [isDarkMode, setIsDarkMode] = useState(false)
     // Selected data index (month) for showing detailed values
@@ -275,6 +282,35 @@
         ...prev,
         [series]: !prev[series]
       }))
+    }
+
+    // Download functions for distribution charts
+    const downloadChart2021 = () => {
+      if (chart2021Instance.current) {
+        const url = chart2021Instance.current.getDataURL({
+          type: 'png',
+          pixelRatio: 2,
+          backgroundColor: isDarkMode ? '#1f2937' : '#ffffff'
+        })
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'passengers-distribution-airlines-2021.png'
+        link.click()
+      }
+    }
+
+    const downloadChart2022 = () => {
+      if (chart2022Instance.current) {
+        const url = chart2022Instance.current.getDataURL({
+          type: 'png',
+          pixelRatio: 2,
+          backgroundColor: isDarkMode ? '#1f2937' : '#ffffff'
+        })
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'passengers-distribution-airlines-2022.png'
+        link.click()
+      }
     }
 
 
@@ -522,24 +558,26 @@
         legend: {
           show: false,
         },
-        // Reduced lateral padding (left/right) to effectively enlarge horizontal plotting area (~15% wider)
-        // Overall container height increased below in the DOM element.
+        // Fixed pixel-based positioning to ensure perfect alignment between charts
+        // Using consistent left margin and containLabel: false for precise alignment
         grid: [
           {
             id: 'arrivals',
-            left: "6%",
+            left: 80,
             right: "3%", 
             bottom: "55%",
             top: 80,
-            containLabel: true,
+            containLabel: false,
+            backgroundColor: isDarkMode ? '#ffffff' : '#ffffff', // keeps arrivals plot area white even in dark mode
           },
           {
             id: 'exchange',
-            left: "6%",
+            left: 80,
             right: "3%",
             bottom: "15%",
             top: "55%",
-            containLabel: true,
+            containLabel: false,
+            backgroundColor: isDarkMode ? '#ffffff' : '#ffffff', // keeps arrivals plot area white even in dark mode
           }
         ],
         // Global axisPointer so a vertical dotted guide spans both grids (linked on x)
@@ -582,6 +620,13 @@
             axisLine: {
               show: false,
             },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                type: "dashed",
+                opacity: 1,
+              },
+            },
           },
           {
             id: 'exchange-x', 
@@ -596,6 +641,13 @@
             },
             axisTick: {
               length: 6,
+            },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                type: "dashed",
+                opacity: 1,
+              },
             },
           }
         ],
@@ -626,7 +678,7 @@
               show: true,
               lineStyle: {
                 type: "dashed",
-                opacity: 0.3,
+                opacity: 1,
               },
             },
           },
@@ -634,7 +686,7 @@
             id: 'exchange-y',
             gridIndex: 1, 
             type: "value",
-            name: "Currency Rate",
+            name: "Currency Rates",
             position: "left",
             boundaryGap: [1.20, 1.20],
             min: 1515,
@@ -656,7 +708,7 @@
               show: true,
               lineStyle: {
                 type: "dashed",
-                opacity: 0.3,
+                opacity: 1,
               },
             },
           }
@@ -709,8 +761,8 @@
                 stack: 'ME_DIFF',
                 data: base,
                 showSymbol: false,
-                smooth: true,
-                silent: true,
+                smooth: false,
+                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
                 areaStyle: { opacity: 0 },
@@ -726,7 +778,7 @@
                 stack: 'ME_DIFF',
                 data: diff,
                 showSymbol: false,
-                smooth: true,
+                smooth: false,
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
@@ -813,7 +865,7 @@
                 stack: 'AO_M_DIFF',
                 data: base,
                 showSymbol: false,
-                smooth: true,
+                smooth: false,
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
@@ -830,7 +882,7 @@
                 stack: 'AO_M_DIFF',
                 data: diff,
                 showSymbol: false,
-                smooth: true,
+                smooth: false,
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
@@ -855,7 +907,7 @@
                 stack: 'UE_DIFF',
                 data: base,
                 showSymbol: false,
-                smooth: true,
+                smooth: false,
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
@@ -872,7 +924,7 @@
                 stack: 'UE_DIFF',
                 data: diff,
                 showSymbol: false,
-                smooth: true,
+                smooth: false,
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
@@ -899,7 +951,7 @@
                 stack: 'MS_DIFF',
                 data: base,
                 showSymbol: false,
-                smooth: true,
+                smooth: false,
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
@@ -916,7 +968,7 @@
                 stack: 'MS_DIFF',
                 data: diff,
                 showSymbol: false,
-                smooth: true,
+                smooth: false,
                 silent: true,
                 clip: true,
                 lineStyle: { opacity: 0 },
@@ -934,7 +986,7 @@
             xAxisIndex: 0,
             yAxisIndex: 0,
             data: seriesVisibility.manifest ? displayData.arrivals : [],
-            smooth: true,
+            smooth: false,
             connectNulls: false,
             lineStyle: {
               width: 3,
@@ -955,8 +1007,8 @@
             type: "line",
             xAxisIndex: 0,
             yAxisIndex: 0,
-            data: providerBefore,
-            smooth: true,
+            data: seriesVisibility.ul ? providerBefore : [],
+            smooth: false,
             connectNulls: false,
             lineStyle: {
               width: 3,
@@ -982,8 +1034,8 @@
             type: "line",
             xAxisIndex: 0,
             yAxisIndex: 0,
-            data: providerAfter,
-            smooth: true,
+            data: seriesVisibility.areebaOummal ? providerAfter : [],
+            smooth: false,
             connectNulls: false,
             lineStyle: {
               width: 3,
@@ -1010,7 +1062,7 @@
             xAxisIndex: 0,
             yAxisIndex: 0,
             data: seriesVisibility.estimated ? displayData.estimatedArrivals : [],
-            smooth: true,
+            smooth: false,
             connectNulls: false,
             lineStyle: {
               width: 3,
@@ -1034,6 +1086,9 @@
             data: seriesVisibility.exchangeRate ? displayData.exchangeRates.map((rate: number | null) => rate !== null ? Math.abs(rate) : null) : [],
             smooth: false,
             connectNulls: false,
+            showSymbol: true,
+            symbol: 'circle',
+            symbolSize: 6,
             lineStyle: {
               width: 2,
               type: "solid",
@@ -1060,6 +1115,9 @@
             data: seriesVisibility.official1515 ? displayData.months.map(() => 1515) : [],
             smooth: false,
             connectNulls: false,
+            showSymbol: true,
+            symbol: 'circle',
+            symbolSize: 6,
             lineStyle: {
               width: 2,
               type: "dashed",
@@ -1080,6 +1138,9 @@
             data: seriesVisibility.sayrafaRate ? displayData.sayrafaRates : [],
             smooth: false,
             connectNulls: false,
+            showSymbol: true,
+            symbol: 'circle',
+            symbolSize: 6,
             lineStyle: {
               width: 2,
               type: "solid",
@@ -1106,6 +1167,9 @@
             data: seriesVisibility.lollarRate ? displayData.lollarRates : [],
             smooth: false,
             connectNulls: false,
+            showSymbol: true,
+            symbol: 'circle',
+            symbolSize: 6,
             lineStyle: {
               width: 2,
               type: "solid",
@@ -1423,6 +1487,214 @@
       }
   }, [selectedPhase, isDarkMode, seriesVisibility, fillVisibility, phaseVisibility, selectedIndex, differenceVisibility])
 
+    // Initialize 2021 distribution chart
+    useEffect(() => {
+      if (!chart2021Ref.current) return
+
+      // Dispose existing instance if any
+      if (chart2021Instance.current) {
+        chart2021Instance.current.dispose()
+        chart2021Instance.current = null
+      }
+
+      const chart2021 = echarts.init(chart2021Ref.current, isDarkMode ? "dark" : undefined)
+      chart2021Instance.current = chart2021
+      
+      const data2021 = [
+        { name: 'Middle East Airline', value: 38 },
+        { name: 'Turkish Airlines', value: 12 },
+        { name: 'Emirates Airlines', value: 7 },
+        { name: 'Qatar Airways', value: 5 },
+        { name: 'Pegasus Airlines', value: 4 },
+        { name: 'Iraqi Airways', value: 3 },
+        { name: 'Air France', value: 3 },
+        { name: 'Ethiopian Airlines', value: 3 },
+        { name: 'Egypt Air', value: 3 },
+        { name: 'SundAir', value: 2 },
+        { name: 'Others', value: 21 }
+      ]
+
+      const total2021 = data2021.reduce((s, d) => s + d.value, 0)
+      const colors2021 = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
+      
+      const option2021 = {
+        grid: { left: '2%', right: '2%', bottom: '22%', top: '10%', containLabel: true },
+        xAxis: {
+          type: 'value',
+          min: 0,
+          max: total2021,
+          axisLabel: { formatter: '{value}%' }
+        },
+        yAxis: {
+          type: 'category',
+          data: ['2021'],
+          axisTick: { show: false },
+          axisLine: { show: false },
+          axisLabel: { show: false }
+        },
+        series: data2021.map((item, idx) => ({
+          name: item.name,
+          type: 'bar',
+          stack: 'total',
+          barWidth: 56,
+          emphasis: {
+            focus: 'series',
+            label: {
+              show: true,
+              position: 'inside',
+              formatter: ({ seriesName, value }: any) => `${seriesName} ${value}%`,
+              fontSize: 11,
+              color: '#111',
+              textBorderColor: '#fff',
+              textBorderWidth: 2
+            }
+          },
+          itemStyle: { color: colors2021[idx % colors2021.length] },
+          label: { show: false },
+          labelLayout: { hideOverlap: false },
+          data: [item.value]
+        })),
+        tooltip: {
+          trigger: 'item',
+          formatter: ({ seriesName, value }: any) => `${seriesName}: ${value}%`
+        },
+        legend: {
+          show: true,
+          type: 'scroll',
+          bottom: 0,
+          left: 0,
+          orient: 'horizontal',
+          itemWidth: 12,
+          itemHeight: 12,
+          textStyle: { fontSize: 11 }
+        }
+      }
+
+      chart2021.setOption(option2021)
+      
+      const handleResize2021 = () => chart2021.resize()
+      window.addEventListener('resize', handleResize2021)
+      
+      return () => {
+        window.removeEventListener('resize', handleResize2021)
+        if (chart2021Instance.current) {
+          chart2021Instance.current.dispose()
+          chart2021Instance.current = null
+        }
+      }
+    }, [isDarkMode])
+
+    // Initialize 2022 distribution chart
+    useEffect(() => {
+      if (!chart2022Ref.current) return
+
+      // Dispose existing instance if any
+      if (chart2022Instance.current) {
+        chart2022Instance.current.dispose()
+        chart2022Instance.current = null
+      }
+
+      const chart2022 = echarts.init(chart2022Ref.current, isDarkMode ? "dark" : undefined)
+      chart2022Instance.current = chart2022
+      
+      const data2022 = [
+        { name: 'Middle East Airline', value: 39 },
+        { name: 'Turkish Airlines', value: 10 },
+        { name: 'Emirates Airlines', value: 6 },
+        { name: 'Pegasus Airlines', value: 5 },
+        { name: 'Qatar Airways', value: 4 },
+        { name: 'Air France', value: 3 },
+        { name: 'Egypt Air', value: 3 },
+        { name: 'Iraqi Airways', value: 3 },
+        { name: 'Lufthansa', value: 2 },
+        { name: 'Royal Jordanian', value: 2 },
+        { name: 'Others', value: 22 }
+      ]
+
+      const total2022 = data2022.reduce((s, d) => s + d.value, 0)
+      const colors2022 = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
+      
+      const option2022 = {
+        grid: { left: '2%', right: '2%', bottom: '22%', top: '10%', containLabel: true },
+        xAxis: {
+          type: 'value',
+          min: 0,
+          max: total2022,
+          axisLabel: { formatter: '{value}%' },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              type: "dashed",
+              opacity: 0.3,
+            },
+          },
+        },
+        yAxis: {
+          type: 'category',
+          data: ['2022'],
+          axisTick: { show: false },
+          axisLine: { show: false },
+          axisLabel: { show: false },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              type: "dashed",
+              opacity: 0.3,
+            },
+          },
+        },
+        series: data2022.map((item, idx) => ({
+          name: item.name,
+          type: 'bar',
+          stack: 'total',
+          barWidth: 56,
+          emphasis: {
+            focus: 'series',
+            label: {
+              show: true,
+              position: 'inside',
+              formatter: ({ seriesName, value }: any) => `${seriesName} ${value}%`,
+              fontSize: 11,
+              color: '#111',
+              textBorderColor: '#fff',
+              textBorderWidth: 2
+            }
+          },
+          itemStyle: { color: colors2022[idx % colors2022.length] },
+          label: { show: false },
+          labelLayout: { hideOverlap: false },
+          data: [item.value]
+        })),
+        tooltip: {
+          trigger: 'item',
+          formatter: ({ seriesName, value }: any) => `${seriesName}: ${value}%`
+        },
+        legend: {
+          show: true,
+          type: 'scroll',
+          bottom: 0,
+          left: 0,
+          orient: 'horizontal',
+          itemWidth: 12,
+          itemHeight: 12,
+          textStyle: { fontSize: 11 }
+        }
+      }
+
+      chart2022.setOption(option2022)
+      
+      const handleResize2022 = () => chart2022.resize()
+      window.addEventListener('resize', handleResize2022)
+      
+      return () => {
+        window.removeEventListener('resize', handleResize2022)
+        if (chart2022Instance.current) {
+          chart2022Instance.current.dispose()
+          chart2022Instance.current = null
+        }
+      }
+    }, [isDarkMode])
+
     return (
       <Card className="w-full">
         <CardHeader>
@@ -1466,49 +1738,217 @@
                   </button>
                 ))}
             </div>
-            {/* Difference Overlays Toggles */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-              <span className="text-xs uppercase tracking-wide text-muted-foreground mr-2">Highlight Differences:</span>
-              <button
-                onClick={() => toggleDifference('manifestEstimated')}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.manifestEstimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
-              >Manifest vs Estimated</button>
-              <button
-                onClick={() => toggleDifference('estimatedUL')}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.estimatedUL ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'}`}
-              >UL vs Estimated</button>
-                          <button
-                onClick={() => toggleDifference('areebaManifest')}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}
-              >Estimated vs 3rd phase</button>
-              <button
-                onClick={() => toggleDifference('marketSayrafa')}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${differenceVisibility.marketSayrafa ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}`}
-              >Market vs Sayrafa</button>
-  
-            </div>
-
-            {/* Area Fill Toggles */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-              <span className="text-xs uppercase tracking-wide text-muted-foreground mr-2">Area Fill:</span>
-              <button onClick={() => toggleFill('manifest')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.manifest ? 'bg-gray-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>Manifest</button>
-              <button onClick={() => toggleFill('ul')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.ul ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'}`}>UL</button>
-                            <button onClick={() => toggleFill('estimated')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.estimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>Estimated</button>
-              <button onClick={() => toggleFill('areebaOummal')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.areebaOummal ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'}`}>3rd Phase</button>
-
-              
-              <button onClick={() => toggleFill('exchangeRate')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.exchangeRate ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}`}>Market</button>
-              <button onClick={() => toggleFill('sayrafaRate')} className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${fillVisibility.sayrafaRate ? 'bg-green-600 text-white' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}`}>Sayrafa</button>
-            </div>
-
-
 
            
           </div>
         </CardHeader>
         <CardContent>
-          {/* Increased chart height by ~15% (600px -> 690px) for better vertical resolution of both sections */}
-          <div ref={chartRef} className="w-full h-[690px]" style={{ minHeight: "690px" }} />
+          {/* Main chart area with external left toggles */}
+          <div className="relative">
+            {/* External left toggles for arrivals section (top half of chart) */}
+            <div className="absolute left-[-215px] top-[80px] flex flex-col gap-1 z-10">
+              {/* Manifest toggle with fill */}
+              <div className="flex items-start gap-1">
+                <Toggle
+                  pressed={seriesVisibility.manifest}
+                  onPressedChange={() => toggleSeries('manifest')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-20 text-xs ${seriesVisibility.manifest ? 'border-gray-600 bg-gray-50 dark:bg-gray-950/20' : ''}`}
+                >
+                  <span className="text-xs text-gray-600">Manifest</span>
+                </Toggle>
+                <Toggle
+                  pressed={fillVisibility.manifest}
+                  onPressedChange={() => toggleFill('manifest')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-6 ${fillVisibility.manifest ? 'bg-gray-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
+                >
+                  <span className="text-xs">F</span>
+                </Toggle>
+                <Toggle
+                  pressed={differenceVisibility.manifestEstimated}
+                  onPressedChange={() => toggleDifference('manifestEstimated')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-8 w-16 text-xs relative top-2 ${differenceVisibility.manifestEstimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700'}`}
+                >
+                  <span className="text-xs">M-E</span>
+                </Toggle>
+              </div>
+
+              {/* Estimated toggle with fill */}
+              <div className="flex items-start gap-1">
+                <Toggle
+                  pressed={seriesVisibility.estimated}
+                  onPressedChange={() => toggleSeries('estimated')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-20 text-xs ${seriesVisibility.estimated ? 'border-black bg-gray-50 dark:bg-gray-950/20' : ''}`}
+                >
+                  <span className="text-xs text-black dark:text-white">Estimated</span>
+                </Toggle>
+                <Toggle
+                  pressed={fillVisibility.estimated}
+                  onPressedChange={() => toggleFill('estimated')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-6 ${fillVisibility.estimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700'}`}
+                >
+                  <span className="text-xs">F</span>
+                </Toggle>
+                <Toggle
+                  pressed={differenceVisibility.estimatedUL}
+                  onPressedChange={() => toggleDifference('estimatedUL')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-8 w-16 text-xs relative top-2 ${differenceVisibility.estimatedUL ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40'}`}
+                >
+                  <span className="text-xs">E-UL</span>
+                </Toggle>
+              </div>
+
+              {/* UL Tests toggle with fill */}
+              <div className="flex items-start gap-1">
+                <Toggle
+                  pressed={seriesVisibility.ul}
+                  onPressedChange={() => toggleSeries('ul')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-20 text-xs ${seriesVisibility.ul ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/20' : ''}`}
+                >
+                  <span className="text-xs text-blue-600">UL Tests</span>
+                </Toggle>
+                <Toggle
+                  pressed={fillVisibility.ul}
+                  onPressedChange={() => toggleFill('ul')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-6 ${fillVisibility.ul ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40'}`}
+                >
+                  <span className="text-xs">F</span>
+                </Toggle>
+                <Toggle
+                  pressed={differenceVisibility.areebaManifest}
+                  onPressedChange={() => toggleDifference('areebaManifest')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-8 w-16 text-xs relative top-2 ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40'}`}
+                >
+                  <span className="text-xs">P3-E</span>
+                </Toggle>
+              </div>
+
+              {/* Phase 3 toggle with fill */}
+              <div className="flex items-center gap-1">
+                <Toggle
+                  pressed={seriesVisibility.areebaOummal}
+                  onPressedChange={() => toggleSeries('areebaOummal')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-20 text-xs ${seriesVisibility.areebaOummal ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/20' : ''}`}
+                >
+                  <span className="text-xs text-purple-600">Phase 3</span>
+                </Toggle>
+                <Toggle
+                  pressed={fillVisibility.areebaOummal}
+                  onPressedChange={() => toggleFill('areebaOummal')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-6 ${fillVisibility.areebaOummal ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40'}`}
+                >
+                  <span className="text-xs">F</span>
+                </Toggle>
+              </div>
+            </div>
+
+            {/* External left toggles for exchange rate section (bottom half of chart) */}
+            <div className="absolute left-[-215px] top-[400px] flex flex-col gap-1 z-10">
+              {/* Market Rate toggle with fill */}
+              <div className="flex items-start gap-1">
+                <Toggle
+                  pressed={seriesVisibility.exchangeRate}
+                  onPressedChange={() => toggleSeries('exchangeRate')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-20 text-xs ${seriesVisibility.exchangeRate ? 'border-red-600 bg-red-50 dark:bg-red-950/20' : ''}`}
+                >
+                  <span className="text-xs text-red-600">Market</span>
+                </Toggle>
+                <Toggle
+                  pressed={fillVisibility.exchangeRate}
+                  onPressedChange={() => toggleFill('exchangeRate')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-6 ${fillVisibility.exchangeRate ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40'}`}
+                >
+                  <span className="text-xs">F</span>
+                </Toggle>
+                <Toggle
+                  pressed={differenceVisibility.marketSayrafa}
+                  onPressedChange={() => toggleDifference('marketSayrafa')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-8 w-16 text-xs relative top-2 ${differenceVisibility.marketSayrafa ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40'}`}
+                >
+                  <span className="text-xs">M-S</span>
+                </Toggle>
+              </div>
+
+              {/* Sayrafa Rate toggle with fill */}
+              <div className="flex items-center gap-1">
+                <Toggle
+                  pressed={seriesVisibility.sayrafaRate}
+                  onPressedChange={() => toggleSeries('sayrafaRate')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-20 text-xs ${seriesVisibility.sayrafaRate ? 'border-green-600 bg-green-50 dark:bg-green-950/20' : ''}`}
+                >
+                  <span className="text-xs text-green-600">Sayrafa</span>
+                </Toggle>
+                <Toggle
+                  pressed={fillVisibility.sayrafaRate}
+                  onPressedChange={() => toggleFill('sayrafaRate')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-6 ${fillVisibility.sayrafaRate ? 'bg-green-600 text-white' : 'bg-green-100 dark:bg-green-900/40'}`}
+                >
+                  <span className="text-xs">F</span>
+                </Toggle>
+              </div>
+
+              {/* 3900 LBP toggle */}
+              <div className="flex items-center gap-1">
+                <Toggle
+                  pressed={seriesVisibility.lollarRate}
+                  onPressedChange={() => toggleSeries('lollarRate')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-20 text-xs ${seriesVisibility.lollarRate ? 'border-amber-600 bg-amber-50 dark:bg-amber-950/20' : ''}`}
+                >
+                  <span className="text-xs text-amber-600">3900</span>
+                </Toggle>
+              </div>
+
+              {/* 1515 LBP toggle */}
+              <div className="flex items-center gap-1">
+                <Toggle
+                  pressed={seriesVisibility.official1515}
+                  onPressedChange={() => toggleSeries('official1515')}
+                  variant="outline"
+                  size="sm"
+                  className={`h-6 w-20 text-xs ${seriesVisibility.official1515 ? 'border-teal-600 bg-gray-50 dark:bg-gray-950/20' : ''}`}
+                >
+                  <span className="text-xs text-teal-600">1515</span>
+                </Toggle>
+              </div>
+            </div>
+
+            {/* Main chart */}
+            <div ref={chartRef} className="w-full h-[690px]" style={{ minHeight: "690px" }} />
+          </div>
+
           {/* Selected month details */}
           <div className="mt-4 p-4 rounded-lg border bg-muted/30 text-sm">
             {(() => {
@@ -1540,276 +1980,28 @@
               )
             })()}
           </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            <button
-              onClick={() => toggleSeries('manifest')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.manifest
-                  ? 'bg-gray-50 dark:bg-gray-950/20 hover:bg-gray-100 dark:hover:bg-gray-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.manifest ? 'text-gray-600' : 'text-gray-400'
-              }`}>
-                {(() => {
-                  const currentPhase = getFilteredPhaseData()
-                  const validValues = currentPhase.arrivals.filter((v): v is number => v !== null);
-                  let sum = 0;
-                  (validValues as number[]).forEach(value => sum += value);
-                  return sum.toLocaleString();
-                })()}
-              </div>
-              <div className="text-sm text-muted-foreground">Total Manifest</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.manifest ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-
-            <button
-              onClick={() => toggleSeries('estimated')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.estimated
-                  ? 'bg-gray-50 dark:bg-gray-950/20 hover:bg-gray-100 dark:hover:bg-gray-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.estimated ? 'text-black dark:text-white' : 'text-gray-400'
-              }`}>
-                {(() => {
-                  const currentPhase = getFilteredPhaseData()
-                  const validValues = currentPhase.estimatedArrivals.filter((v): v is number => v !== null);
-                  let sum = 0;
-                  (validValues as number[]).forEach(value => sum += value);
-                  return sum.toLocaleString();
-                })()}
-              </div>
-              <div className="text-sm text-muted-foreground">Total Estimated</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.estimated ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-            <button
-              onClick={() => toggleSeries('ul')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.ul
-                  ? 'bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.ul ? 'text-blue-600' : 'text-gray-400'
-              }`}>
-                {(() => {
-                  const currentPhase = getFilteredPhaseData()
-                  const validValues = currentPhase.ulTests.filter((v): v is number => v !== null);
-                  let sum = 0;
-                  (validValues as number[]).forEach(value => sum += value);
-                  return sum.toLocaleString();
-                })()}
-              </div>
-              <div className="text-sm text-muted-foreground">Total UL</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.ul ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-                        <button
-              onClick={() => toggleSeries('areebaOummal')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.areebaOummal
-                  ? 'bg-purple-50 dark:bg-purple-950/20 hover:bg-purple-100 dark:hover:bg-purple-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.areebaOummal ? 'text-purple-600' : 'text-gray-400'
-              }`}>
-                {(() => {
-                  const currentPhase = getFilteredPhaseData()
-                  if (!currentPhase.areebaOummal) return '—'
-                  const validValues = currentPhase.areebaOummal.filter((v: number | null): v is number => v != null)
-                  if (!validValues.length) return '—'
-                  const sum = validValues.reduce((a:number,b:number)=>a+b,0)
-                  return sum.toLocaleString()
-                })()}
-              </div>
-              <div className="text-sm text-muted-foreground">Total Phase 3</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.areebaOummal ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-            
-            {/* Replace Market card with Sayrafa / 1515 / 3900 toggles */}
-            <button
-              onClick={() => toggleSeries('sayrafaRate')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.sayrafaRate
-                  ? 'bg-green-50 dark:bg-green-950/20 hover:bg-green-100 dark:hover:bg-green-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.sayrafaRate ? 'text-green-600' : 'text-gray-400'
-              }`}>
-                Sayrafa
-              </div>
-              <div className="text-sm text-muted-foreground">Toggle Sayrafa Curve</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.sayrafaRate ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-            <button
-              onClick={() => toggleSeries('official1515')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.official1515
-                  ? 'bg-gray-50 dark:bg-gray-950/20 hover:bg-gray-100 dark:hover:bg-gray-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.official1515 ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400'
-              }`}>
-                1515 LBP
-              </div>
-              <div className="text-sm text-muted-foreground">Toggle 1515 Baseline</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.official1515 ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-            <button
-              onClick={() => toggleSeries('lollarRate')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.lollarRate
-                  ? 'bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.lollarRate ? 'text-amber-600' : 'text-gray-400'
-              }`}>
-                3900 LBP
-              </div>
-              <div className="text-sm text-muted-foreground">Toggle 3900 Baseline</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.lollarRate ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-            <button
-              onClick={() => toggleSeries('exchangeRate')}
-              className={`text-center p-4 rounded-lg transition-all duration-200 ${
-                seriesVisibility.exchangeRate
-                  ? 'bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/30'
-                  : 'bg-gray-200 dark:bg-gray-800 opacity-50'
-              }`}
-            >
-              <div className={`text-2xl font-bold ${
-                seriesVisibility.exchangeRate ? 'text-red-600' : 'text-gray-400'
-              }`}>
-                Market Rate
-              </div>
-              <div className="text-sm text-muted-foreground">Toggle Market Rate Curve</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {seriesVisibility.exchangeRate ? 'Click to hide' : 'Click to show'}
-              </div>
-            </button>
-
-          </div>
           
           {/* Stacked Bar Charts for Airline Distribution */}
           <div className="mt-8 grid grid-cols-1 gap-8">
             {/* 2021 Stacked Bar Chart */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl text-center">Passengers distribution by airlines - 2021</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl flex-1 text-center">Passengers distribution by airlines - 2021</CardTitle>
+                  <Button 
+                    onClick={downloadChart2021}
+                    variant="outline" 
+                    size="sm"
+                    className="ml-4"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download PNG
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="w-full h-[340px]">
-                  <div ref={(ref) => {
-                    if (ref && !ref.hasAttribute('data-initialized-2021')) {
-                      const chart2021 = echarts.init(ref)
-                      ref.setAttribute('data-initialized-2021', 'true')
-                      
-                      const data2021 = [
-                        { name: 'Middle East Airline', value: 38 },
-                        { name: 'Turkish Airlines', value: 12 },
-                        { name: 'Emirates Airlines', value: 7 },
-                        { name: 'Qatar Airways', value: 5 },
-                        { name: 'Pegasus Airlines', value: 4 },
-                        { name: 'Iraqi Airways', value: 3 },
-                        { name: 'Air France', value: 3 },
-                        { name: 'Ethiopian Airlines', value: 3 },
-                        { name: 'Egypt Air', value: 3 },
-                        { name: 'SundAir', value: 2 },
-                        { name: 'Others', value: 21 }
-                      ]
-
-                      const total2021 = data2021.reduce((s, d) => s + d.value, 0)
-                      const colors2021 = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
-                      const option2021 = {
-                        grid: { left: '2%', right: '2%', bottom: '22%', top: '10%', containLabel: true },
-                        xAxis: {
-                          type: 'value',
-                          min: 0,
-                          max: total2021,
-                          axisLabel: { formatter: '{value}%' }
-                        },
-                        yAxis: {
-                          type: 'category',
-                          data: ['2021'],
-                          axisTick: { show: false },
-                          axisLine: { show: false },
-                          axisLabel: { show: false }
-                        },
-                        series: data2021.map((item, idx) => ({
-                          name: item.name,
-                          type: 'bar',
-                          stack: 'total',
-                          barWidth: 56,
-                          emphasis: {
-                            focus: 'series',
-                            label: {
-                              show: true,
-                              position: 'inside',
-                              formatter: ({ seriesName, value }: any) => `${seriesName} ${value}%`,
-                              fontSize: 11,
-                              color: '#111',
-                              textBorderColor: '#fff',
-                              textBorderWidth: 2
-                            }
-                          },
-                          itemStyle: { color: colors2021[idx % colors2021.length] },
-                          label: { show: false },
-                          labelLayout: { hideOverlap: false },
-                          data: [item.value]
-                        })),
-                        tooltip: {
-                          trigger: 'item',
-                          formatter: ({ seriesName, value }: any) => `${seriesName}: ${value}%`
-                        },
-                        legend: {
-                          show: true,
-                          type: 'scroll',
-                          bottom: 0,
-                          left: 0,
-                          orient: 'horizontal',
-                          itemWidth: 12,
-                          itemHeight: 12,
-                          textStyle: { fontSize: 11 }
-                        }
-                      }
-
-                      chart2021.setOption(option2021)
-                      
-                      const handleResize2021 = () => chart2021.resize()
-                      window.addEventListener('resize', handleResize2021)
-                      
-                      return () => {
-                        window.removeEventListener('resize', handleResize2021)
-                        chart2021.dispose()
-                      }
-                    }
-                  }} className="w-full h-full" />
+                  <div ref={chart2021Ref} className="w-full h-full" />
                 </div>
               </CardContent>
             </Card>
@@ -1817,95 +2009,22 @@
             {/* 2022 Stacked Bar Chart */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl text-center">Passengers distribution by airlines - 2022</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl flex-1 text-center">Passengers distribution by airlines - 2022</CardTitle>
+                  <Button 
+                    onClick={downloadChart2022}
+                    variant="outline" 
+                    size="sm"
+                    className="ml-4"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download PNG
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="w-full h-[340px]">
-                  <div ref={(ref) => {
-                    if (ref && !ref.hasAttribute('data-initialized-2022')) {
-                      const chart2022 = echarts.init(ref)
-                      ref.setAttribute('data-initialized-2022', 'true')
-                      
-                      const data2022 = [
-                        { name: 'Middle East Airline', value: 39 },
-                        { name: 'Turkish Airlines', value: 10 },
-                        { name: 'Emirates Airlines', value: 6 },
-                        { name: 'Pegasus Airlines', value: 5 },
-                        { name: 'Qatar Airways', value: 4 },
-                        { name: 'Air France', value: 3 },
-                        { name: 'Egypt Air', value: 3 },
-                        { name: 'Iraqi Airways', value: 3 },
-                        { name: 'Lufthansa', value: 2 },
-                        { name: 'Royal Jordanian', value: 2 },
-                        { name: 'Others', value: 22 }
-                      ]
-
-                      const total2022 = data2022.reduce((s, d) => s + d.value, 0)
-                      const colors2022 = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#FFB6C1', '#87CEEB', '#F0E68C', '#D3D3D3']
-                      const option2022 = {
-                        grid: { left: '2%', right: '2%', bottom: '22%', top: '10%', containLabel: true },
-                        xAxis: {
-                          type: 'value',
-                          min: 0,
-                          max: total2022,
-                          axisLabel: { formatter: '{value}%' }
-                        },
-                        yAxis: {
-                          type: 'category',
-                          data: ['2022'],
-                          axisTick: { show: false },
-                          axisLine: { show: false },
-                          axisLabel: { show: false }
-                        },
-                        series: data2022.map((item, idx) => ({
-                          name: item.name,
-                          type: 'bar',
-                          stack: 'total',
-                          barWidth: 56,
-                          emphasis: {
-                            focus: 'series',
-                            label: {
-                              show: true,
-                              position: 'inside',
-                              formatter: ({ seriesName, value }: any) => `${seriesName} ${value}%`,
-                              fontSize: 11,
-                              color: '#111',
-                              textBorderColor: '#fff',
-                              textBorderWidth: 2
-                            }
-                          },
-                          itemStyle: { color: colors2022[idx % colors2022.length] },
-                          label: { show: false },
-                          labelLayout: { hideOverlap: false },
-                          data: [item.value]
-                        })),
-                        tooltip: {
-                          trigger: 'item',
-                          formatter: ({ seriesName, value }: any) => `${seriesName}: ${value}%`
-                        },
-                        legend: {
-                          show: true,
-                          type: 'scroll',
-                          bottom: 0,
-                          left: 0,
-                          orient: 'horizontal',
-                          itemWidth: 12,
-                          itemHeight: 12,
-                          textStyle: { fontSize: 11 }
-                        }
-                      }
-
-                      chart2022.setOption(option2022)
-                      
-                      const handleResize2022 = () => chart2022.resize()
-                      window.addEventListener('resize', handleResize2022)
-                      
-                      return () => {
-                        window.removeEventListener('resize', handleResize2022)
-                        chart2022.dispose()
-                      }
-                    }
-                  }} className="w-full h-full" />
+                  <div ref={chart2022Ref} className="w-full h-full" />
                 </div>
               </CardContent>
             </Card>
