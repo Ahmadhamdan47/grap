@@ -197,6 +197,8 @@
     },
   }
 
+  // (Daily helpers removed; we keep monthly axis and only handle the Jan-22 transition visually.)
+
   export default function ArrivalsChart() {
     const chartRef = useRef<HTMLDivElement>(null)
     const chartInstance = useRef<echarts.ECharts | null>(null)
@@ -390,42 +392,32 @@
 
       const currentPhase = getFilteredPhaseData()
       const displayData = currentPhase
-      // Build unified Provider series (UL before Jan-22, UL + A+O at Jan-22, A+O after Jan-22)
+      // Build unified Provider (Combined) series for continuity across Jan-22
       const janIndex = displayData.months.indexOf('Jan-22')
-      const providerBefore: (number | null)[] = []
-      const providerAfter: (number | null)[] = []
+      const providerCombined: (number | null)[] = []
       for (let i = 0; i < displayData.months.length; i++) {
         const ulVal = displayData.ulTests ? displayData.ulTests[i] : null
         const aoVal = displayData.areebaOummal ? displayData.areebaOummal[i] : null
         if (janIndex === -1) {
           // Fallback: prefer A+O if exists else UL
-            providerBefore.push(ulVal)
-            providerAfter.push(aoVal)
+          providerCombined.push(aoVal ?? ulVal)
           continue
         }
         if (i < janIndex) {
-          providerBefore.push(ulVal)
-          providerAfter.push(null)
+          providerCombined.push(ulVal)
         } else if (i === janIndex) {
           // Sum at January transition
           const summed = (ulVal ?? 0) + (aoVal ?? 0)
-          providerBefore.push(summed)
-          providerAfter.push(summed)
+          providerCombined.push(summed)
         } else { // after Jan
-          providerBefore.push(null)
-          providerAfter.push(aoVal)
+          providerCombined.push(aoVal)
         }
       }
-      // Midpoint separator between Jan-22 and Feb-22
-      const janBoundary = janIndex !== -1
-        ? janIndex + 0.5
-        : 17.5
-      // Position (slightly offset) for vertical separator showing UL -> Areeba+Oummal transition
+      // Position for vertical separator showing UL -> Areeba+Oummal transition within Jan (Jan 10)
       const ulAreebaTransitionPosition = (() => {
         if (janIndex === -1) return null
-        // Larger offset so the line is more noticeably to the right of Jan.
-        // 0.0  = exactly on Jan, 0.5 = midpoint between Jan & Feb. We choose 0.42.
-        const offset = 0.42
+        const daysInJan = 31
+        const offset = 9 / daysInJan // end of Jan 9, Phase 3 starts Jan 10
         return janIndex + offset
       })()
 
@@ -1003,11 +995,11 @@
             },
           },
           {
-            name: "Provider (UL → A+O)",
+            name: "UL Tests",
             type: "line",
             xAxisIndex: 0,
             yAxisIndex: 0,
-            data: seriesVisibility.ul ? providerBefore : [],
+            data: seriesVisibility.ul ? displayData.ulTests : [],
             smooth: false,
             connectNulls: false,
             lineStyle: {
@@ -1030,11 +1022,11 @@
             },
           },
           {
-            name: "Provider (A+O)",
+            name: "Areeba+Oummal",
             type: "line",
             xAxisIndex: 0,
             yAxisIndex: 0,
-            data: seriesVisibility.areebaOummal ? providerAfter : [],
+            data: seriesVisibility.areebaOummal ? displayData.areebaOummal : [],
             smooth: false,
             connectNulls: false,
             lineStyle: {
@@ -1055,6 +1047,28 @@
             emphasis: {
               focus: "series",
             },
+          },
+          {
+            name: "Provider (Combined)",
+            type: "line",
+            xAxisIndex: 0,
+            yAxisIndex: 0,
+            data: providerCombined,
+            smooth: false,
+            connectNulls: false,
+            lineStyle: {
+              width: 2,
+              type: 'dashed',
+              color: '#0ea5e9'
+            },
+            itemStyle: {
+              color: "#0ea5e9",
+            },
+            emphasis: {
+              focus: "series",
+            },
+            tooltip: { show: false },
+            z: 2
           },
           {
             name: "Estimated",
@@ -1249,7 +1263,7 @@
             // (Removed Phase 2-3 separator as requested)
           ] : []),
           // UL -> Areeba+Oummal transition vertical separator (shown when Jan-22 and both providers context are relevant)
-          ...((ulAreebaTransitionPosition !== null) && (selectedPhase === 'all' || selectedPhase === 'phase3') ? [
+          ...((ulAreebaTransitionPosition !== null) && (selectedPhase === 'all' || selectedPhase === 'phase3' || selectedPhase === 'phase2') ? [
             {
               name: 'Transition from UL to Areeba+Oummal ',
               type: 'line' as const,
@@ -1271,12 +1285,12 @@
                 label: {
                   show: true,
                   position: 'insideEndTop',
-                  formatter: 'Transition to 3rd phase',
+                  formatter: 'Phase 3 starts Jan 10',
                   color: '#7c3aed',
                   fontSize: 8,
                   fontWeight: 'bold'
                 },
-                data: [ { xAxis: ulAreebaTransitionPosition } ]
+                data: [ { xAxis: ulAreebaTransitionPosition as number } ]
               }
             },
             {
@@ -1303,12 +1317,12 @@
                 label: {
                   show: true,
                   position: 'insideEndBottom',
-                  formatter: 'transition to 3rd phase',
+                  formatter: 'Phase 3 starts Jan 10',
                   color: '#7c3aed',
                   fontSize: 10,
                   fontWeight: 'bold'
                 },
-                data: [ { xAxis: ulAreebaTransitionPosition } ]
+                data: [ { xAxis: ulAreebaTransitionPosition as number } ]
               }
             }
           ] : []),
@@ -1696,8 +1710,8 @@
     }, [isDarkMode])
 
     return (
-      <Card className="w-full">
-        <CardHeader>
+      <Card className="w-full max-w-none">
+        <CardHeader className="px-2 sm:px-6">
           <div className="flex flex-col gap-4">
             {/* Navigation Button */}
             <div className="flex justify-end">
@@ -1711,7 +1725,7 @@
             <CardTitle className="text-2xl text-center">Complacency Analysis: Multi-Phase Data Correlation Dashboard</CardTitle>
             
             {/* Phase Toggle Buttons */}
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="flex flex-wrap justify-center gap-2 overflow-x-auto">
               <button
                 onClick={() => setSelectedPhase('all')}
                 className={`px-4 py-2 rounded-lg transition-colors ${
@@ -1742,211 +1756,220 @@
            
           </div>
         </CardHeader>
-        <CardContent>
-          {/* Main chart area with external left toggles */}
-          <div className="relative">
-            {/* External left toggles for arrivals section (top half of chart) */}
-            <div className="absolute left-[-215px] top-[80px] flex flex-col gap-1 z-10">
-              {/* Manifest toggle with fill */}
-              <div className="flex items-start gap-1">
-                <Toggle
-                  pressed={seriesVisibility.manifest}
-                  onPressedChange={() => toggleSeries('manifest')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-20 text-xs ${seriesVisibility.manifest ? 'border-gray-600 bg-gray-50 dark:bg-gray-950/20' : ''}`}
-                >
-                  <span className="text-xs text-gray-600">Manifest</span>
-                </Toggle>
-                <Toggle
-                  pressed={fillVisibility.manifest}
-                  onPressedChange={() => toggleFill('manifest')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-6 ${fillVisibility.manifest ? 'bg-gray-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
-                >
-                  <span className="text-xs">F</span>
-                </Toggle>
-                <Toggle
-                  pressed={differenceVisibility.manifestEstimated}
-                  onPressedChange={() => toggleDifference('manifestEstimated')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 w-16 text-xs relative top-2 ${differenceVisibility.manifestEstimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700'}`}
-                >
-                  <span className="text-xs">M-E</span>
-                </Toggle>
-              </div>
+        <CardContent className="px-2 sm:px-6">
+          {/* Responsive chart area with flex layout */}
+          <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 relative w-full">
+            {/* Left side: Toggles */}
+            <div className="flex flex-row lg:flex-col gap-2 sm:gap-4 w-full lg:w-[200px] shrink-0 overflow-x-auto">
+              <div className="flex flex-row lg:flex-col gap-2 min-w-fit">
+                {/* Arrivals Toggles */}
+                <div className="font-semibold text-xs sm:text-sm text-muted-foreground lg:mb-2">Arrivals</div>
+                
+                {/* Manifest toggle with fill */}
+                <div className="flex items-start gap-1 flex-wrap">
+                  <Toggle
+                    pressed={seriesVisibility.manifest}
+                    onPressedChange={() => toggleSeries('manifest')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-14 sm:w-20 text-xs ${seriesVisibility.manifest ? 'border-gray-600 bg-gray-50 dark:bg-gray-950/20' : ''}`}
+                  >
+                    <span className="text-[10px] sm:text-xs text-gray-600">Manifest</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={fillVisibility.manifest}
+                    onPressedChange={() => toggleFill('manifest')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-5 sm:w-6 ${fillVisibility.manifest ? 'bg-gray-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">F</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={differenceVisibility.manifestEstimated}
+                    onPressedChange={() => toggleDifference('manifestEstimated')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-10 sm:w-12 text-xs ${differenceVisibility.manifestEstimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">M-E</span>
+                  </Toggle>
+                </div>
 
-              {/* Estimated toggle with fill */}
-              <div className="flex items-start gap-1">
-                <Toggle
-                  pressed={seriesVisibility.estimated}
-                  onPressedChange={() => toggleSeries('estimated')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-20 text-xs ${seriesVisibility.estimated ? 'border-black bg-gray-50 dark:bg-gray-950/20' : ''}`}
-                >
-                  <span className="text-xs text-black dark:text-white">Estimated</span>
-                </Toggle>
-                <Toggle
-                  pressed={fillVisibility.estimated}
-                  onPressedChange={() => toggleFill('estimated')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-6 ${fillVisibility.estimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700'}`}
-                >
-                  <span className="text-xs">F</span>
-                </Toggle>
-                <Toggle
-                  pressed={differenceVisibility.estimatedUL}
-                  onPressedChange={() => toggleDifference('estimatedUL')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 w-16 text-xs relative top-2 ${differenceVisibility.estimatedUL ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40'}`}
-                >
-                  <span className="text-xs">E-UL</span>
-                </Toggle>
-              </div>
+                {/* Estimated toggle with fill */}
+                <div className="flex items-start gap-1 flex-wrap">
+                  <Toggle
+                    pressed={seriesVisibility.estimated}
+                    onPressedChange={() => toggleSeries('estimated')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-14 sm:w-20 text-xs ${seriesVisibility.estimated ? 'border-black bg-gray-50 dark:bg-gray-950/20' : ''}`}
+                  >
+                    <span className="text-[10px] sm:text-xs text-black dark:text-white">Estimated</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={fillVisibility.estimated}
+                    onPressedChange={() => toggleFill('estimated')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-5 sm:w-6 ${fillVisibility.estimated ? 'bg-black text-white dark:bg-black/80' : 'bg-gray-200 dark:bg-gray-700'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">F</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={differenceVisibility.estimatedUL}
+                    onPressedChange={() => toggleDifference('estimatedUL')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-10 sm:w-12 text-xs ${differenceVisibility.estimatedUL ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">E-UL</span>
+                  </Toggle>
+                </div>
 
-              {/* UL Tests toggle with fill */}
-              <div className="flex items-start gap-1">
-                <Toggle
-                  pressed={seriesVisibility.ul}
-                  onPressedChange={() => toggleSeries('ul')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-20 text-xs ${seriesVisibility.ul ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/20' : ''}`}
-                >
-                  <span className="text-xs text-blue-600">UL Tests</span>
-                </Toggle>
-                <Toggle
-                  pressed={fillVisibility.ul}
-                  onPressedChange={() => toggleFill('ul')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-6 ${fillVisibility.ul ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40'}`}
-                >
-                  <span className="text-xs">F</span>
-                </Toggle>
-                <Toggle
-                  pressed={differenceVisibility.areebaManifest}
-                  onPressedChange={() => toggleDifference('areebaManifest')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 w-16 text-xs relative top-2 ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40'}`}
-                >
-                  <span className="text-xs">P3-E</span>
-                </Toggle>
-              </div>
+                {/* UL Tests toggle with fill */}
+                <div className="flex items-start gap-1 flex-wrap">
+                  <Toggle
+                    pressed={seriesVisibility.ul}
+                    onPressedChange={() => toggleSeries('ul')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-14 sm:w-20 text-xs ${seriesVisibility.ul ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/20' : ''}`}
+                  >
+                    <span className="text-[10px] sm:text-xs text-blue-600">UL Tests</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={fillVisibility.ul}
+                    onPressedChange={() => toggleFill('ul')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-5 sm:w-6 ${fillVisibility.ul ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">F</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={differenceVisibility.areebaManifest}
+                    onPressedChange={() => toggleDifference('areebaManifest')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-10 sm:w-12 text-xs ${differenceVisibility.areebaManifest ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">P3-E</span>
+                  </Toggle>
+                </div>
 
-              {/* Phase 3 toggle with fill */}
-              <div className="flex items-center gap-1">
-                <Toggle
-                  pressed={seriesVisibility.areebaOummal}
-                  onPressedChange={() => toggleSeries('areebaOummal')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-20 text-xs ${seriesVisibility.areebaOummal ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/20' : ''}`}
-                >
-                  <span className="text-xs text-purple-600">Phase 3</span>
-                </Toggle>
-                <Toggle
-                  pressed={fillVisibility.areebaOummal}
-                  onPressedChange={() => toggleFill('areebaOummal')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-6 ${fillVisibility.areebaOummal ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40'}`}
-                >
-                  <span className="text-xs">F</span>
-                </Toggle>
+                {/* Phase 3 toggle with fill */}
+                <div className="flex items-center gap-1 flex-wrap">
+                  <Toggle
+                    pressed={seriesVisibility.areebaOummal}
+                    onPressedChange={() => toggleSeries('areebaOummal')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-14 sm:w-20 text-xs ${seriesVisibility.areebaOummal ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/20' : ''}`}
+                  >
+                    <span className="text-[10px] sm:text-xs text-purple-600">Phase 3</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={fillVisibility.areebaOummal}
+                    onPressedChange={() => toggleFill('areebaOummal')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-5 sm:w-6 ${fillVisibility.areebaOummal ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/40'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">F</span>
+                  </Toggle>
+                </div>
+              </div>
+              
+              <div className="flex flex-row lg:flex-col gap-2 lg:mt-4 min-w-fit">
+                {/* Currency Toggles */}
+                <div className="font-semibold text-xs sm:text-sm text-muted-foreground lg:mb-2">Currency</div>
+                
+                {/* Market Rate toggle with fill */}
+                <div className="flex items-start gap-1 flex-wrap">
+                  <Toggle
+                    pressed={seriesVisibility.exchangeRate}
+                    onPressedChange={() => toggleSeries('exchangeRate')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-14 sm:w-20 text-xs ${seriesVisibility.exchangeRate ? 'border-red-600 bg-red-50 dark:bg-red-950/20' : ''}`}
+                  >
+                    <span className="text-[10px] sm:text-xs text-red-600">Market</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={fillVisibility.exchangeRate}
+                    onPressedChange={() => toggleFill('exchangeRate')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-5 sm:w-6 ${fillVisibility.exchangeRate ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">F</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={differenceVisibility.marketSayrafa}
+                    onPressedChange={() => toggleDifference('marketSayrafa')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-10 sm:w-12 text-xs ${differenceVisibility.marketSayrafa ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">M-S</span>
+                  </Toggle>
+                </div>
+
+                {/* Sayrafa Rate toggle with fill */}
+                <div className="flex items-center gap-1 flex-wrap">
+                  <Toggle
+                    pressed={seriesVisibility.sayrafaRate}
+                    onPressedChange={() => toggleSeries('sayrafaRate')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-14 sm:w-20 text-xs ${seriesVisibility.sayrafaRate ? 'border-green-600 bg-green-50 dark:bg-green-950/20' : ''}`}
+                  >
+                    <span className="text-[10px] sm:text-xs text-green-600">Sayrafa</span>
+                  </Toggle>
+                  <Toggle
+                    pressed={fillVisibility.sayrafaRate}
+                    onPressedChange={() => toggleFill('sayrafaRate')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-5 sm:w-6 ${fillVisibility.sayrafaRate ? 'bg-green-600 text-white' : 'bg-green-100 dark:bg-green-900/40'}`}
+                  >
+                    <span className="text-[10px] sm:text-xs">F</span>
+                  </Toggle>
+                </div>
+
+                {/* 3900 LBP toggle */}
+                <div className="flex items-center gap-1 flex-wrap">
+                  <Toggle
+                    pressed={seriesVisibility.lollarRate}
+                    onPressedChange={() => toggleSeries('lollarRate')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-14 sm:w-20 text-xs ${seriesVisibility.lollarRate ? 'border-amber-600 bg-amber-50 dark:bg-amber-950/20' : ''}`}
+                  >
+                    <span className="text-[10px] sm:text-xs text-amber-600">3900</span>
+                  </Toggle>
+                </div>
+
+                {/* 1515 LBP toggle */}
+                <div className="flex items-center gap-1 flex-wrap">
+                  <Toggle
+                    pressed={seriesVisibility.official1515}
+                    onPressedChange={() => toggleSeries('official1515')}
+                    variant="outline"
+                    size="sm"
+                    className={`h-5 sm:h-6 w-14 sm:w-20 text-xs ${seriesVisibility.official1515 ? 'border-teal-600 bg-gray-50 dark:bg-gray-950/20' : ''}`}
+                  >
+                    <span className="text-[10px] sm:text-xs text-teal-600">1515</span>
+                  </Toggle>
+                </div>
               </div>
             </div>
 
-            {/* External left toggles for exchange rate section (bottom half of chart) */}
-            <div className="absolute left-[-215px] top-[400px] flex flex-col gap-1 z-10">
-              {/* Market Rate toggle with fill */}
-              <div className="flex items-start gap-1">
-                <Toggle
-                  pressed={seriesVisibility.exchangeRate}
-                  onPressedChange={() => toggleSeries('exchangeRate')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-20 text-xs ${seriesVisibility.exchangeRate ? 'border-red-600 bg-red-50 dark:bg-red-950/20' : ''}`}
-                >
-                  <span className="text-xs text-red-600">Market</span>
-                </Toggle>
-                <Toggle
-                  pressed={fillVisibility.exchangeRate}
-                  onPressedChange={() => toggleFill('exchangeRate')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-6 ${fillVisibility.exchangeRate ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40'}`}
-                >
-                  <span className="text-xs">F</span>
-                </Toggle>
-                <Toggle
-                  pressed={differenceVisibility.marketSayrafa}
-                  onPressedChange={() => toggleDifference('marketSayrafa')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 w-16 text-xs relative top-2 ${differenceVisibility.marketSayrafa ? 'bg-red-600 text-white' : 'bg-red-100 dark:bg-red-900/40'}`}
-                >
-                  <span className="text-xs">M-S</span>
-                </Toggle>
-              </div>
-
-              {/* Sayrafa Rate toggle with fill */}
-              <div className="flex items-center gap-1">
-                <Toggle
-                  pressed={seriesVisibility.sayrafaRate}
-                  onPressedChange={() => toggleSeries('sayrafaRate')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-20 text-xs ${seriesVisibility.sayrafaRate ? 'border-green-600 bg-green-50 dark:bg-green-950/20' : ''}`}
-                >
-                  <span className="text-xs text-green-600">Sayrafa</span>
-                </Toggle>
-                <Toggle
-                  pressed={fillVisibility.sayrafaRate}
-                  onPressedChange={() => toggleFill('sayrafaRate')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-6 ${fillVisibility.sayrafaRate ? 'bg-green-600 text-white' : 'bg-green-100 dark:bg-green-900/40'}`}
-                >
-                  <span className="text-xs">F</span>
-                </Toggle>
-              </div>
-
-              {/* 3900 LBP toggle */}
-              <div className="flex items-center gap-1">
-                <Toggle
-                  pressed={seriesVisibility.lollarRate}
-                  onPressedChange={() => toggleSeries('lollarRate')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-20 text-xs ${seriesVisibility.lollarRate ? 'border-amber-600 bg-amber-50 dark:bg-amber-950/20' : ''}`}
-                >
-                  <span className="text-xs text-amber-600">3900</span>
-                </Toggle>
-              </div>
-
-              {/* 1515 LBP toggle */}
-              <div className="flex items-center gap-1">
-                <Toggle
-                  pressed={seriesVisibility.official1515}
-                  onPressedChange={() => toggleSeries('official1515')}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 w-20 text-xs ${seriesVisibility.official1515 ? 'border-teal-600 bg-gray-50 dark:bg-gray-950/20' : ''}`}
-                >
-                  <span className="text-xs text-teal-600">1515</span>
-                </Toggle>
-              </div>
+            {/* Right side: Chart */}
+            <div className="flex-1 w-full min-w-0">
+              <div ref={chartRef} className="w-full min-h-[400px] aspect-[2/1] sm:min-h-[600px]" />
             </div>
-
-            {/* Main chart */}
-            <div ref={chartRef} className="w-full h-[690px]" style={{ minHeight: "690px" }} />
           </div>
 
           {/* Selected month details */}
@@ -1982,9 +2005,9 @@
           </div>
           
           {/* Stacked Bar Charts for Airline Distribution */}
-          <div className="mt-8 grid grid-cols-1 gap-8">
+          <div className="mt-4 sm:mt-8 grid grid-cols-1 gap-4 sm:gap-8 w-full">
             {/* 2021 Stacked Bar Chart */}
-            <Card>
+            <Card className="w-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl flex-1 text-center">Passengers distribution by airlines - 2021</CardTitle>
@@ -2000,14 +2023,14 @@
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="w-full h-[340px]">
+                <div className="w-full aspect-[2/1] sm:aspect-[3/1] min-h-[260px]">
                   <div ref={chart2021Ref} className="w-full h-full" />
                 </div>
               </CardContent>
             </Card>
 
             {/* 2022 Stacked Bar Chart */}
-            <Card>
+            <Card className="w-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl flex-1 text-center">Passengers distribution by airlines - 2022</CardTitle>
@@ -2023,7 +2046,7 @@
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="w-full h-[340px]">
+                <div className="w-full aspect-[2/1] sm:aspect-[3/1] min-h-[260px]">
                   <div ref={chart2022Ref} className="w-full h-full" />
                 </div>
               </CardContent>
