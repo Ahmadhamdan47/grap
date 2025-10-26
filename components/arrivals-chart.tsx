@@ -243,6 +243,8 @@
       marketSayrafa: false,
       areebaManifest: false,
     })
+    // Table-specific difference column visibility
+    const [tableDifferenceVisible, setTableDifferenceVisible] = useState(false)
 
     // Detect dark mode
     useEffect(() => {
@@ -371,7 +373,7 @@
 
 
     useEffect(() => {
-      if (!chartRef.current) return
+      if (!chartRef.current || viewMode !== 'chart') return
 
       // Initialize chart
       chartInstance.current = echarts.init(chartRef.current, isDarkMode ? "dark" : undefined)
@@ -386,7 +388,7 @@
         window.removeEventListener("resize", handleResize)
         chartInstance.current?.dispose()
       }
-    }, [isDarkMode])
+    }, [isDarkMode, viewMode])
 
     useEffect(() => {
       if (!chartInstance.current) return
@@ -1458,11 +1460,11 @@
           dataIndex: selectedIndex
         })
       }
-  }, [selectedPhase, isDarkMode, seriesVisibility, fillVisibility, phaseVisibility, selectedIndex, differenceVisibility])
+  }, [selectedPhase, isDarkMode, seriesVisibility, fillVisibility, phaseVisibility, selectedIndex, differenceVisibility, viewMode])
 
     // Initialize 2021 distribution chart
     useEffect(() => {
-      if (!chart2021Ref.current) return
+      if (!chart2021Ref.current || viewMode !== 'chart') return
 
       // Dispose existing instance if any
       if (chart2021Instance.current) {
@@ -1555,11 +1557,11 @@
           chart2021Instance.current = null
         }
       }
-    }, [isDarkMode])
+    }, [isDarkMode, viewMode])
 
     // Initialize 2022 distribution chart
     useEffect(() => {
-      if (!chart2022Ref.current) return
+      if (!chart2022Ref.current || viewMode !== 'chart') return
 
       // Dispose existing instance if any
       if (chart2022Instance.current) {
@@ -1666,23 +1668,40 @@
           chart2022Instance.current = null
         }
       }
-    }, [isDarkMode])
+    }, [isDarkMode, viewMode])
 
     return (
       <Card className="w-full max-w-none">
         <CardHeader className="px-2 sm:px-6">
           <div className="flex flex-col gap-4">
-            {/* Navigation Button */}
+            {/* Navigation Buttons */}
             <div className="flex justify-between items-center">
-              <Button
-                onClick={() => setViewMode(viewMode === 'chart' ? 'table' : 'chart')}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                {viewMode === 'chart' ? <Table className="w-4 h-4" /> : <BarChart3 className="w-4 h-4" />}
-                Switch to {viewMode === 'chart' ? 'Table' : 'Chart'} View
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => setViewMode(viewMode === 'chart' ? 'table' : 'chart')}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  {viewMode === 'chart' ? <Table className="w-4 h-4" /> : <BarChart3 className="w-4 h-4" />}
+                  Switch to {viewMode === 'chart' ? 'Table' : 'Chart'} View
+                </Button>
+                
+                {viewMode === 'table' && (
+                  <Button
+                    onClick={() => setTableDifferenceVisible(!tableDifferenceVisible)}
+                    variant="outline"
+                    size="sm"
+                    className={`flex items-center gap-2 transition-colors ${
+                      tableDifferenceVisible
+                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-300 dark:border-yellow-600'
+                        : ''
+                    }`}
+                  >
+                    {tableDifferenceVisible ? '✓' : '+'} Difference Column
+                  </Button>
+                )}
+              </div>
               
               <a 
                 href="/in-out"
@@ -2383,45 +2402,100 @@
               <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-gray-800">
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Month</th>
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Manifest Arrivals</th>
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Estimated Arrivals</th>
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">UL Tests</th>
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Areeba+Oummal</th>
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">USD/LBP Rate</th>
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Sayrafa Rate</th>
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">Lollar Rate</th>
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-16">Month</th>
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-20">Manifest</th>
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-20">Estimated</th>
+                    {tableDifferenceVisible && (
+                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">M-E Diff</th>
+                    )}
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-24">Lebanese University</th>
+                    {tableDifferenceVisible && (
+                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">E-LU Diff</th>
+                    )}
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-24">Areeba + Oummal</th>
+                    {tableDifferenceVisible && (
+                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">A+O-M Diff</th>
+                    )}
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-20">USD/LBP</th>
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18">Sayrafa</th>
+                    {tableDifferenceVisible && (
+                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">M-S Diff</th>
+                    )}
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-16">Lollar</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(() => {
                     const currentPhase = getFilteredPhaseData()
-                    return currentPhase.months.map((month, index) => (
-                      <tr key={month} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 font-medium">{month}</td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">
-                          {currentPhase.arrivals[index] != null ? currentPhase.arrivals[index]?.toLocaleString() : '—'}
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">
-                          {currentPhase.estimatedArrivals[index] != null ? currentPhase.estimatedArrivals[index]?.toLocaleString() : '—'}
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">
-                          {currentPhase.ulTests[index] != null ? currentPhase.ulTests[index]?.toLocaleString() : '—'}
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">
-                          {currentPhase.areebaOummal[index] != null ? (currentPhase.areebaOummal[index] as number)?.toLocaleString() : '—'}
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">
-                          {currentPhase.exchangeRates[index] != null ? Math.abs(currentPhase.exchangeRates[index]).toLocaleString() + ' LBP' : '—'}
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">
-                          {currentPhase.sayrafaRates[index] != null ? currentPhase.sayrafaRates[index].toLocaleString() + ' LBP' : '—'}
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">
-                          {currentPhase.lollarRates[index] != null ? currentPhase.lollarRates[index].toLocaleString() + ' LBP' : '—'}
-                        </td>
-                      </tr>
-                    ))
+                    return currentPhase.months.map((month, index) => {
+                      const manifestValue = currentPhase.arrivals[index]
+                      const estimatedValue = currentPhase.estimatedArrivals[index]
+                      const ulValue = currentPhase.ulTests[index]
+                      const areebaOummalValue = currentPhase.areebaOummal[index]
+                      const usdLbpValue = currentPhase.exchangeRates[index] != null ? Math.abs(currentPhase.exchangeRates[index]) : null
+                      const sayrafaValue = currentPhase.sayrafaRates[index]
+                      
+                      // Calculate differences
+                      const manifestEstimatedDiff = (manifestValue != null && estimatedValue != null) 
+                        ? Math.abs(estimatedValue - manifestValue) 
+                        : null
+                      const estimatedUlDiff = (estimatedValue != null && ulValue != null) 
+                        ? Math.abs(ulValue - estimatedValue) 
+                        : null
+                      const areebaManifestDiff = (areebaOummalValue != null && manifestValue != null) 
+                        ? Math.abs((areebaOummalValue as number) - manifestValue) 
+                        : null
+                      const marketSayrafaDiff = (usdLbpValue != null && sayrafaValue != null) 
+                        ? Math.abs(usdLbpValue - sayrafaValue) 
+                        : null
+                      
+                      return (
+                        <tr key={month} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 font-medium text-sm w-16 text-center">{month}</td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-20">
+                            {manifestValue != null ? manifestValue.toLocaleString() : '—'}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-20">
+                            {estimatedValue != null ? estimatedValue.toLocaleString() : '—'}
+                          </td>
+                          {tableDifferenceVisible && (
+                            <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-18 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 font-medium">
+                              {manifestEstimatedDiff != null ? manifestEstimatedDiff.toLocaleString() : '—'}
+                            </td>
+                          )}
+                          <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-24">
+                            {ulValue != null ? ulValue.toLocaleString() : '—'}
+                          </td>
+                          {tableDifferenceVisible && (
+                            <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-18 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 font-medium">
+                              {estimatedUlDiff != null ? estimatedUlDiff.toLocaleString() : '—'}
+                            </td>
+                          )}
+                          <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-24">
+                            {areebaOummalValue != null ? (areebaOummalValue as number).toLocaleString() : '—'}
+                          </td>
+                          {tableDifferenceVisible && (
+                            <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-18 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 font-medium">
+                              {areebaManifestDiff != null ? areebaManifestDiff.toLocaleString() : '—'}
+                            </td>
+                          )}
+                          <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-20">
+                            {usdLbpValue != null ? usdLbpValue.toLocaleString() + ' LBP' : '—'}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-18">
+                            {sayrafaValue != null ? sayrafaValue.toLocaleString() + ' LBP' : '—'}
+                          </td>
+                          {tableDifferenceVisible && (
+                            <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-18 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 font-medium">
+                              {marketSayrafaDiff != null ? marketSayrafaDiff.toLocaleString() + ' LBP' : '—'}
+                            </td>
+                          )}
+                          <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-16">
+                            {currentPhase.lollarRates[index] != null ? currentPhase.lollarRates[index].toLocaleString() + ' LBP' : '—'}
+                          </td>
+                        </tr>
+                      )
+                    })
                   })()}
                 </tbody>
               </table>
