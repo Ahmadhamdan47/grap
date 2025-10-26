@@ -137,8 +137,8 @@
     null,null,null,null,null, // Aug20-Dec20
     null,null,null,null,null,null, // Jan21-Jun21
     null,null,null,null,null,null, // Jul21-Dec21
-    74605, // Jan-22
-    151443, // Feb-22
+    83002, // Jan-22
+    154146, // Feb-22
     null,null,null,null,null // Mar22-Jul22
   ]
 
@@ -482,12 +482,26 @@
             // Differences (always absolute, never show negative signs)
             // Manifest vs Estimated
             const diffManifestEstimated = (manifest != null && estimated != null) ? Math.abs(estimated - manifest) : null
+            
+            // Special handling for January 2022 differences
+            const currentMonth = params[0]?.axisValue ?? ''
+            
             // Group 1 (Estimated/UL) Difference: UL vs Estimated
-            const diffULvsEstimated = (ul != null && estimated != null) ? Math.abs(ul - estimated) : null
+            const diffULvsEstimated = (ul != null && estimated != null) 
+              ? (currentMonth === 'Jan-22' 
+                  ? Math.abs(ul - (estimated * 0.35))  // UL vs 35% of estimated for Jan-22
+                  : Math.abs(ul - estimated))          // Normal calculation for other months
+              : null
+            
             // Group 2 (Rates) Difference: Market vs Sayrafa
             const diffMarketSayrafa = (currency != null && sayrafa != null) ? Math.abs(currency - sayrafa) : null
-            // Areeba+Oummal vs Manifest
-            const diffAreebaManifest = (aoVal != null && manifest != null) ? Math.abs((aoVal as number) - manifest) : null
+            
+            // Estimated vs Areeba+Oummal (Third Party)
+            const diffEstimatedAreeba = (aoVal != null && estimated != null) 
+              ? (currentMonth === 'Jan-22' 
+                  ? Math.abs((aoVal as number) - (estimated * 0.65))  // Third Party vs 65% of estimated for Jan-22
+                  : Math.abs(estimated - (aoVal as number)))           // Normal calculation for other months
+              : null
 
             const fmt = (v: number | null | undefined, unit?: string) => {
               if (v == null) return '—'
@@ -523,7 +537,7 @@
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin:4px 0"></div>` +
               `<div><span style="color:#111827">Estimated:</span> ${fmt(estimated)}</div>` +
               `<div><span style=\"color:#7c3aed">3rd Phase:</span> ${fmt(aoVal)}</div>` +
-              `<div><span style=\"color:#7c3aed">Difference:</span> ${fmt(diffAreebaManifest)}</div>` +
+              `<div><span style=\"color:#7c3aed">Difference:</span> ${fmt(diffEstimatedAreeba)}</div>` +
               `<div style="border-top:1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};margin:4px 0"></div>` +
               `<div><span style=\"color:#dc2626">Market:</span> ${fmt(currency, 'LBP')}</div>` +
               `<div><span style="color:#16a34a">Sayrafa:</span> ${fmt(sayrafa, 'LBP')}</div>` +
@@ -2356,56 +2370,7 @@
             })()}
           </div>
           
-          {/* Stacked Bar Charts for Airline Distribution */}
-          <div className="mt-4 sm:mt-8 grid grid-cols-1 gap-4 sm:gap-8 w-full">
-            {/* 2021 Stacked Bar Chart */}
-            <Card className="w-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl flex-1 text-center">Passengers distribution by airlines - 2021</CardTitle>
-                  <Button 
-                    onClick={downloadChart2021}
-                    variant="outline" 
-                    size="sm"
-                    className="ml-4"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download PNG
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="w-full aspect-[2/1] sm:aspect-[3/1] min-h-[260px]">
-                  <div ref={chart2021Ref} className="w-full h-full" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 2022 Stacked Bar Chart */}
-            <Card className="w-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl flex-1 text-center">Passengers distribution by airlines - 2022</CardTitle>
-                  <Button 
-                    onClick={downloadChart2022}
-                    variant="outline" 
-                    size="sm"
-                    className="ml-4"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download PNG
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="w-full aspect-[2/1] sm:aspect-[3/1] min-h-[260px]">
-                  <div ref={chart2022Ref} className="w-full h-full" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Reference Section */}
+          {/* Reference Section - Placed under main chart */}
           <div className="mt-4 sm:mt-8">
             <Button 
               onClick={() => setShowReference(!showReference)}
@@ -2465,6 +2430,55 @@
               </div>
             )}
           </div>
+          
+          {/* Stacked Bar Charts for Airline Distribution */}
+          <div className="mt-4 sm:mt-8 grid grid-cols-1 gap-4 sm:gap-8 w-full">
+            {/* 2021 Stacked Bar Chart */}
+            <Card className="w-full">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl flex-1 text-center">Passengers distribution by airlines - 2021</CardTitle>
+                  <Button 
+                    onClick={downloadChart2021}
+                    variant="outline" 
+                    size="sm"
+                    className="ml-4"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download PNG
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full aspect-[2/1] sm:aspect-[3/1] min-h-[260px]">
+                  <div ref={chart2021Ref} className="w-full h-full" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 2022 Stacked Bar Chart */}
+            <Card className="w-full">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl flex-1 text-center">Passengers distribution by airlines - 2022</CardTitle>
+                  <Button 
+                    onClick={downloadChart2022}
+                    variant="outline" 
+                    size="sm"
+                    className="ml-4"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download PNG
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full aspect-[2/1] sm:aspect-[3/1] min-h-[260px]">
+                  <div ref={chart2022Ref} className="w-full h-full" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
             </>
           ) : (
             // Table View
@@ -2509,12 +2523,20 @@
                       const manifestEstimatedDiff = (manifestValue != null && estimatedValue != null) 
                         ? Math.abs(estimatedValue - manifestValue) 
                         : null
+                      
+                      // Special handling for January 2022 differences
                       const estimatedUlDiff = (estimatedValue != null && ulValue != null) 
-                        ? Math.abs(ulValue - estimatedValue) 
+                        ? (month === 'Jan-22' 
+                            ? Math.abs(ulValue - (estimatedValue * 0.35))  // UL vs 35% of estimated for Jan-22
+                            : Math.abs(ulValue - estimatedValue))          // Normal calculation for other months
                         : null
-                      const areebaManifestDiff = (areebaOummalValue != null && manifestValue != null) 
-                        ? Math.abs((areebaOummalValue as number) - manifestValue) 
+                      
+                      const estimatedAreebaDiff = (areebaOummalValue != null && estimatedValue != null) 
+                        ? (month === 'Jan-22' 
+                            ? Math.abs((areebaOummalValue as number) - (estimatedValue * 0.65))  // Third Party vs 65% of estimated for Jan-22
+                            : Math.abs(estimatedValue - (areebaOummalValue as number)))           // Normal calculation for other months
                         : null
+                      
                       const marketSayrafaDiff = (usdLbpValue != null && sayrafaValue != null) 
                         ? Math.abs(usdLbpValue - sayrafaValue) 
                         : null
@@ -2546,7 +2568,13 @@
                           </td>
                           {tableDifferenceVisible && (
                             <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-18 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 font-medium">
-                              {areebaManifestDiff != null ? areebaManifestDiff.toLocaleString() : '—'}
+                              {estimatedAreebaDiff != null 
+                                ? (month === 'Jan-22' 
+                                    ? `(${estimatedAreebaDiff.toLocaleString()})` 
+                                    : month === 'Feb-22' 
+                                      ? `(${estimatedAreebaDiff.toLocaleString()})`
+                                      : estimatedAreebaDiff.toLocaleString())
+                                : '—'}
                             </td>
                           )}
                           <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-20">

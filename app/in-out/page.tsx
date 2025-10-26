@@ -865,7 +865,7 @@ export default function InOutPage() {
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">63%</td>
                       </tr>
                       <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Human Resources (+MoF)</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Human Resources </td>
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$78,042</td>
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">26%</td>
                       </tr>
@@ -929,6 +929,29 @@ export default function InOutPage() {
               {showReference && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
                   <div className="text-sm space-y-3">
+                    <div>
+                      <strong>Areeba:</strong>
+                      <p className="mt-1">
+                        Areeba acclaimed 2 amounts: one in LBP and one in USD
+                      </p>
+                      <ul className="list-disc list-inside ml-4 mt-1">
+                        <li>LBP: 21,546,559,800.00 LBP</li>
+                        <li>USD: $5,207,541.73</li>
+                      </ul>
+                      <p className="mt-2">
+                        To calculate the total amount received by the treasury in April 2022 in USD, the amount in LBP was divided by the average SAYRAFA exchange rate in April 2022. (1USD=22,429LBP)
+                      </p>
+                      <p className="mt-1">
+                        However when calculating the number of tests, 35% of the LBP amount was divided by 720,000 (=30$) for the tests done from 10 January till the end of January and 65% of the LBP amount was divided by 600,000 (=30$) for the tests done in February.
+                      </p>
+                      <p className="mt-1">
+                        The amount in USD was divided by 30 to get the number of tests.
+                      </p>
+                      <p className="mt-1">
+                        Oummal acclaimed an amount of $289,415 which was divided by 30 to get the number of tests.
+                      </p>
+                    </div>
+                    
                     <div>
                       <strong>International transfer fees:</strong>
                       <ul className="list-disc list-inside ml-4 mt-1">
