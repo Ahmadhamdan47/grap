@@ -624,26 +624,29 @@ export default function InOutPage() {
     }
   }
 
+  // Payer data (inner pie chart)
+  const payerData = [
+    { name: 'Airlines', value: 192515, percentage: '65%' },
+    { name: 'American Express', value: 96900, percentage: '33%' },
+    { name: 'Border PCR', value: 5969, percentage: '2%' }
+  ]
+
+  // Calculate payer total
+  const payerTotal = payerData.reduce((sum, item) => sum + item.value, 0)
+
+  // Expense type data (outer pie chart)
+  const expenseData = [
+    { name: 'Treasury (MoF)', value: 185609, percentage: '63%' },
+    { name: 'Human Resources (+MoF)', value: 78042, percentage: '26%' },
+    { name: 'Project operation supplies', value: 19156, percentage: '6%' },
+    { name: 'Other (supplies, rent, tests..)', value: 12577, percentage: '4%' }
+  ]
+
   useEffect(() => {
     if (!chartRef.current) return
 
     // Initialize the chart
     chartInstance.current = echarts.init(chartRef.current)
-
-    // Payer data (inner pie chart)
-    const payerData = [
-      { name: 'Airlines', value: 192515, percentage: '65%' },
-      { name: 'American Express', value: 96900, percentage: '33%' },
-      { name: 'Border PCR', value: 5969, percentage: '2%' }
-    ]
-
-    // Expense type data (outer pie chart)
-    const expenseData = [
-      { name: 'Treasury (MoF)', value: 185609, percentage: '63%' },
-      { name: 'Human Resources (+MoF+NSSF)', value: 78042, percentage: '26%' },
-      { name: 'Project operation supplies', value: 19156, percentage: '6%' },
-      { name: 'Other (supplies, rent, tests..)', value: 12577, percentage: '4%' }
-    ]
 
     const option = {
       title: {
@@ -829,6 +832,11 @@ export default function InOutPage() {
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,969</td>
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">2%</td>
                       </tr>
+                      <tr className="font-semibold bg-gray-50 dark:bg-gray-800">
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Total:</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">${payerTotal.toLocaleString()}</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">100%</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -854,7 +862,7 @@ export default function InOutPage() {
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">63%</td>
                       </tr>
                       <tr>
-                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Human Resources (+MoF+NSSF)</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Human Resources (+MoF)</td>
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$78,042</td>
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">26%</td>
                       </tr>

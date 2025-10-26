@@ -1535,13 +1535,13 @@
         },
         legend: {
           show: true,
-          type: 'scroll',
           bottom: 0,
-          left: 0,
+          left: 'center',
           orient: 'horizontal',
           itemWidth: 12,
           itemHeight: 12,
-          textStyle: { fontSize: 11 }
+          textStyle: { fontSize: 11 },
+          itemGap: 15
         }
       }
 
@@ -1646,13 +1646,13 @@
         },
         legend: {
           show: true,
-          type: 'scroll',
           bottom: 0,
-          left: 0,
+          left: 'center',
           orient: 'horizontal',
           itemWidth: 12,
           itemHeight: 12,
-          textStyle: { fontSize: 11 }
+          textStyle: { fontSize: 11 },
+          itemGap: 15
         }
       }
 
@@ -2406,20 +2406,20 @@
                     <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-20">Manifest</th>
                     <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-20">Estimated</th>
                     {tableDifferenceVisible && (
-                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">M-E Diff</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">Manifest - Estimated</th>
                     )}
                     <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-24">Lebanese University</th>
                     {tableDifferenceVisible && (
-                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">E-LU Diff</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">Estimated - Lebanese University</th>
                     )}
-                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-24">Areeba + Oummal</th>
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-24">Third Party</th>
                     {tableDifferenceVisible && (
-                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">A+O-M Diff</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">Estimated - Third Party</th>
                     )}
-                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-20">USD/LBP</th>
+                    <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-20">Market Rate</th>
                     <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18">Sayrafa</th>
                     {tableDifferenceVisible && (
-                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">M-S Diff</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-18 bg-yellow-50 dark:bg-yellow-900/20">Market Rate - Sayrafa</th>
                     )}
                     <th className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-center text-sm w-16">Lollar</th>
                   </tr>
