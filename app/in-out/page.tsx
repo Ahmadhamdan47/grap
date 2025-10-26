@@ -39,6 +39,9 @@ export default function InOutPage() {
   const ticketTableRef = useRef<HTMLTableElement>(null)
   const performanceTableRef = useRef<HTMLTableElement>(null)
   
+  // State for reference visibility
+  const [showReference, setShowReference] = useState(false)
+  
   // State for flight records
   const [flightRecords, setFlightRecords] = useState<FlightRecord[]>([
     {
@@ -912,11 +915,183 @@ export default function InOutPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {/* Reference Section */}
+            <div className="mb-6">
+              <Button 
+                onClick={() => setShowReference(!showReference)}
+                variant="outline"
+                size="sm"
+                className="mb-4"
+              >
+                {showReference ? ' ' : ' '} Ref.
+              </Button>
+              
+              {showReference && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                  <div className="text-sm space-y-3">
+                    <div>
+                      <strong>International transfer fees:</strong>
+                      <ul className="list-disc list-inside ml-4 mt-1">
+                        <li>American Express = 3%</li>
+                        <li>Areeba = 5%</li>
+                      </ul>
+                    </div>
+                    
+                    <p>
+                      We do not have a resource from the payment portals on how much were the fees, or whether they were deducted or not. The percentages above are based on research.
+                    </p>
+                    
+                    <div>
+                      <strong>Tests paid by EMD to the traveling agencies when booking the ticket = 20,000 tests</strong>
+                      <p className="mt-1">
+                        <em>From 10 January 2022</em>, some passengers were registering on the MoPH Pass and paying the test price for the traveling agencies when booking the tickets. This went on for 7-12 days, and around 20,000 tests were paid that way. This amount was not collected by the treasury and is not placed into focus.
+                      </p>
+                    </div>
+                    
+                    <p className="text-gray-600 dark:text-gray-400 italic">
+                      These numbers and percentages can be confirmed by ESRI, who developed the MoPH Pass platform.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Amounts received tables */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold mb-4">Amounts received and corresponding number of tests (without deducted fees of Areeba & American Express)</h3>
+              <div className="overflow-x-auto mb-6">
+                <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-gray-800">
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payer</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payment Method</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payee</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Amount USD</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Actual USD</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Nb of tests</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Six Airlines</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Bank & Money Transfer Company</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Oummal Acc</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$192,515</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$192,515</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">6,417</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">American Express</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Online Payment Gateway</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Oummal Acc</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$96,900</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$96,900</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">3,230</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Areeba</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Online Payment Gateway</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Ministry of Finance Account</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,207,542</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,207,542</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">173,585</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">LBP 21,546,559,800</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$960,656</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">33,816</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">EMD</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Cash</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Traveling Agency</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$600,000</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$600,000</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">20,000</td>
+                    </tr>
+                    <tr className="font-semibold bg-gray-50 dark:bg-gray-800">
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2" colSpan={3}>Total</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$7,057,613</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">237,048</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 className="text-lg font-semibold mb-4">Amounts received and corresponding number of tests (with deducted fees of Areeba & American Express)</h3>
+              <div className="overflow-x-auto mb-6">
+                <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-gray-800">
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payer</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payment Method</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payee</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Amount USD</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Actual USD</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Nb of tests</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Six Airlines</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Bank & Money Transfer Company</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Oummal Acc</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$192,515</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$192,515</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">6,417</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">American Express</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Online Payment Gateway</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Oummal Acc</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$96,900</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$99,897</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">3,330</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Areeba</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Online Payment Gateway</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Ministry of Finance Account</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,207,541.73</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,481,623</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">182,721</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">LBP 21,546,559,800</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$945,025</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">31,501</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">EMD</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Cash</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Traveling Agency</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$600,000</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$600,000</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">20,000</td>
+                    </tr>
+                    <tr className="font-semibold bg-gray-50 dark:bg-gray-800">
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2" colSpan={3}>Total</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$7,319,059</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">243,969</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             <div className="overflow-x-auto">
               <table ref={performanceTableRef} className="w-full border-collapse border border-gray-300 dark:border-gray-600">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-gray-800">
-                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Analytical Comparison</th>
+                    <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Analytical Comparison	 </th>
                     <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold"></th>
                     <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold"></th>
                     <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-center font-semibold">Phase II</th>
@@ -926,52 +1101,32 @@ export default function InOutPage() {
                 <tbody>
                   {/* Outcome Section */}
                   <tr>
-                    <td rowSpan={8} className="border border-gray-300 dark:border-gray-600 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 font-semibold align-top">
+                    <td rowSpan={4} className="border border-gray-300 dark:border-gray-600 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 font-semibold align-top">
                       Outcome
                     </td>
-                    <td rowSpan={4} className="border border-gray-300 dark:border-gray-600 px-4 py-3 bg-gray-50 dark:bg-gray-800 font-medium align-top">
+                    <td rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-4 py-3 bg-gray-50 dark:bg-gray-800 font-medium align-top">
                       Acclaimed number of tests vs. Estimated number of tests
                     </td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"># UL</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Acclaimed</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">1,000,000</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">237,148</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"># Est</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Estimation</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">1,306,455</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"># Oummal&Areeba</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">226,048</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">#Est</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">243,665</td>
                   </tr>
                   <tr>
-                    <td rowSpan={4} className="border border-gray-300 dark:border-gray-600 px-4 py-3 bg-gray-50 dark:bg-gray-800 font-medium align-top">
+                    <td rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-4 py-3 bg-gray-50 dark:bg-gray-800 font-medium align-top">
                       Acclaimed amount vs. Estimated amount
                     </td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Am UL</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Acclaimed</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$50,000,000</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$6,997,727</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Am Est</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Estimation</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$65,322,750</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Am O&Aree</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$6,394,730</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Am Est</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$7,309,950</td>
                   </tr>
 
@@ -983,47 +1138,47 @@ export default function InOutPage() {
                     <td rowSpan={5} className="border border-gray-300 dark:border-gray-600 px-4 py-3 bg-gray-50 dark:bg-gray-800 font-medium align-top">
                       Epidemiological Surveillance
                     </td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Untested arrivals at the airport:</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Untested arrivals at the airport</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">306,455</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">617</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">6,517</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Estimated infected arrivals (3%):</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Estimated infected arrivals (3%)</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">9,194</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">19</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">196</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Potential secondary infections (Re 2.5):</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Potential secondary infections (Re 2.5)</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">22,984</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">46</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">489</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Hospitalizations (1-5%):</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Hospitalizations (1-5%)</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">92 - 460</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">0 - 1</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">2 - 10</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Deaths (0.3–0.6% IFR typical for Delta-era):</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Deaths (0.3–0.6% IFR typical for Delta-era)</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">28 - 55</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">0 - 0</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">1 - 1</td>
                   </tr>
                   <tr>
                     <td rowSpan={3} className="border border-gray-300 dark:border-gray-600 px-4 py-3 bg-gray-50 dark:bg-gray-800 font-medium align-top">
                       Financial
                     </td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Collected by the treasury</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$ -</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$6,394,730</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$6,376,696</td>
                   </tr>
                   <tr>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Not collected by the treasury</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$50,000,000</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$ 405,220</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$</td>
                   </tr>
                   <tr>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Unaccounted / Squandered</td>
                     <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$15,322,750</td>
-                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$ 510,000</td>
+                    <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">$933,254</td>
                   </tr>
                 </tbody>
               </table>

@@ -245,6 +245,8 @@
     })
     // Table-specific difference column visibility
     const [tableDifferenceVisible, setTableDifferenceVisible] = useState(false)
+    // State for reference visibility
+    const [showReference, setShowReference] = useState(false)
 
     // Detect dark mode
     useEffect(() => {
@@ -1674,6 +1676,13 @@
       <Card className="w-full max-w-none">
         <CardHeader className="px-2 sm:px-6">
           <div className="flex flex-col gap-4">
+            {/* Last Updated */}
+            <div className="text-left">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Last updated: October 26, 2025
+              </span>
+            </div>
+            
             {/* Navigation Buttons */}
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -2395,6 +2404,67 @@
               </CardContent>
             </Card>
           </div>
+
+          {/* Reference Section */}
+          <div className="mt-4 sm:mt-8">
+            <Button 
+              onClick={() => setShowReference(!showReference)}
+              variant="outline"
+              size="sm"
+              className="mb-4"
+            >
+              {showReference ? ' ' : ' '} Ref.
+            </Button>
+            
+            {showReference && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                <div className="text-sm space-y-4">
+                  <div>
+                    <strong>Estimation of the number of tests = Number of arrivals in the manifest - (&lt;12 years old + UNIFIL members)</strong>
+                  </div>
+                  
+                  <div>
+                    <strong>Estimation of the number of arrivals under 12 years old = 6%</strong>
+                    
+                    <div className="mt-2">
+                      <strong>Reasoning:</strong>
+                      <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                        <li>In Lebanon's demographics, about 24–25% of the population is under 12.</li>
+                        <li>But in air travel, the share is much lower because:
+                          <ul className="list-disc list-inside ml-6 mt-1">
+                            <li>Many children don't travel internationally.</li>
+                            <li>Families with small children are a minority of passenger groups.</li>
+                            <li>Business and labor travel dominate (especially in Lebanon during 2021, a crisis year).</li>
+                          </ul>
+                        </li>
+                        <li>From IATA passenger surveys (pre-COVID) and other travel research:
+                          <ul className="list-disc list-inside ml-6 mt-1">
+                            <li>Children under 12 usually make up 5–8% of international passengers.</li>
+                            <li>During the COVID recovery years (2020–2021), this proportion may have been even lower (families less likely to travel).</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <strong>Estimation of arrivals from the UNIFIL = 5,000 per year; Distribution: heavier shares in mid-year (June/July/August) and end-of-year (December/January), lighter in "off-rotation" months.</strong>
+                    
+                    <div className="mt-2">
+                      <strong>Reasoning:</strong>
+                      <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                        <li>UNIFIL (United Nations Interim Force in Lebanon) has around 10,000 to 11,000 troops and personnel, coming from dozens of countries.</li>
+                        <li>They rotate personnel regularly, but not all arrive by air.</li>
+                        <li>Many arrive via UN logistical routes, including sea and land.</li>
+                        <li>Rotation usually happens in batches every 6 or 12 months.</li>
+                        <li>From UN reports and press releases: Annual troop rotation could mean that 5,000 to 6,000 personnel enter Lebanon via Beirut airport over the year.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
             </>
           ) : (
             // Table View
@@ -2499,6 +2569,67 @@
                   })()}
                 </tbody>
               </table>
+
+              {/* Reference Section for Table View */}
+              <div className="mt-4 sm:mt-8">
+                <Button 
+                  onClick={() => setShowReference(!showReference)}
+                  variant="outline"
+                  size="sm"
+                  className="mb-4"
+                >
+                  {showReference ? ' ' : ' '} Ref.
+                </Button>
+                
+                {showReference && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                    <div className="text-sm space-y-4">
+                      <div>
+                        <strong>Estimation of the number of tests = Number of arrivals in the manifest - (&lt;12 years old + UNIFIL members)</strong>
+                      </div>
+                      
+                      <div>
+                        <strong>Estimation of the number of arrivals under 12 years old = 6%</strong>
+                        
+                        <div className="mt-2">
+                          <strong>Reasoning:</strong>
+                          <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                            <li>In Lebanon's demographics, about 24–25% of the population is under 12.</li>
+                            <li>But in air travel, the share is much lower because:
+                              <ul className="list-disc list-inside ml-6 mt-1">
+                                <li>Many children don't travel internationally.</li>
+                                <li>Families with small children are a minority of passenger groups.</li>
+                                <li>Business and labor travel dominate (especially in Lebanon during 2021, a crisis year).</li>
+                              </ul>
+                            </li>
+                            <li>From IATA passenger surveys (pre-COVID) and other travel research:
+                              <ul className="list-disc list-inside ml-6 mt-1">
+                                <li>Children under 12 usually make up 5–8% of international passengers.</li>
+                                <li>During the COVID recovery years (2020–2021), this proportion may have been even lower (families less likely to travel).</li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <strong>Estimation of arrivals from the UNIFIL = 5,000 per year; Distribution: heavier shares in mid-year (June/July/August) and end-of-year (December/January), lighter in "off-rotation" months.</strong>
+                        
+                        <div className="mt-2">
+                          <strong>Reasoning:</strong>
+                          <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                            <li>UNIFIL (United Nations Interim Force in Lebanon) has around 10,000 to 11,000 troops and personnel, coming from dozens of countries.</li>
+                            <li>They rotate personnel regularly, but not all arrive by air.</li>
+                            <li>Many arrive via UN logistical routes, including sea and land.</li>
+                            <li>Rotation usually happens in batches every 6 or 12 months.</li>
+                            <li>From UN reports and press releases: Annual troop rotation could mean that 5,000 to 6,000 personnel enter Lebanon via Beirut airport over the year.</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </CardContent>
