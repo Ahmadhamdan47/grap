@@ -2570,7 +2570,7 @@
                             <td className="border border-gray-300 dark:border-gray-600 px-1 py-2 text-right text-sm w-18 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 font-medium">
                               {estimatedAreebaDiff != null 
                                 ? (month === 'Jan-22' 
-                                    ? `(${estimatedAreebaDiff.toLocaleString()})` 
+                                    ? estimatedAreebaDiff.toLocaleString()
                                     : month === 'Feb-22' 
                                       ? `(${estimatedAreebaDiff.toLocaleString()})`
                                       : estimatedAreebaDiff.toLocaleString())
