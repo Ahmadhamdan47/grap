@@ -989,7 +989,7 @@ export default function InOutPage() {
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payer</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payment Method</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payee</th>
-                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Amount USD</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Amount</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Actual USD</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Nb of tests</th>
                     </tr>
@@ -1012,18 +1012,15 @@ export default function InOutPage() {
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">3,230</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Areeba</td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Online Payment Gateway</td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Ministry of Finance Account</td>
+                      <td rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-4 py-2">Areeba</td>
+                      <td rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-4 py-2">Online Payment Gateway</td>
+                      <td rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-4 py-2">Ministry of Finance Account</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,207,542</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,207,542</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">173,585</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">LBP 21,546,559,800</td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">LBP 21,546,559,800</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$960,656</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">33,816</td>
                     </tr>
@@ -1053,7 +1050,7 @@ export default function InOutPage() {
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payer</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payment Method</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-semibold">Payee</th>
-                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Amount USD</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Amount</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Actual USD</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-semibold">Nb of tests</th>
                     </tr>
@@ -1076,18 +1073,15 @@ export default function InOutPage() {
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">3,330</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Areeba</td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Online Payment Gateway</td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">Ministry of Finance Account</td>
+                      <td rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-4 py-2">Areeba</td>
+                      <td rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-4 py-2">Online Payment Gateway</td>
+                      <td rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-4 py-2">Ministry of Finance Account</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,207,541.73</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$5,481,623</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">182,721</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2"></td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">LBP 21,546,559,800</td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right"></td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">LBP 21,546,559,800</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">$945,025</td>
                       <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right">31,501</td>
                     </tr>
